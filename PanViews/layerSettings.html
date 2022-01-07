@@ -1,0 +1,98 @@
+
+    <!-- Main content -->
+    <div class="content" style="display: none;" id="layer-settings">
+        <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title m-0">Slideshow Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="settings-color">Background Color (Required):</label>
+                        <input type="text" class="form-control" id="settings-color" placeholder="Background Color">
+                    </div>
+                    <div class="form-group">
+                        <label for="settings-delay">Delay (Sec) (Required):</label>
+                        <input type="number" class="form-control numericOnly" pattern="[0-9]*" id="settings-delay" placeholder="Delay" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label for="settings-overlay-mode">Overlay Mode (Required):</label>
+                        <select class="form-control" id="settings-overlay-mode" required>
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="settings-overlay-div">
+                        <label for="settings-overlay">Overlay (Required):</label>
+                        <input type="hidden" id="settings-overlay">
+                        <ul class="button-list overlay-list">
+                            <li class="overlay-select" data-value="../node_modules/vegas/dist/overlays/01.png" style="background-image: url(/dist/img/vegas/overlays/01.png);">01</li>
+                            <li class="overlay-select" data-value="../node_modules/vegas/dist/overlays/02.png" style="background-image: url(/dist/img/vegas/overlays/02.png);">02</li>
+                            <li class="overlay-select" data-value="../node_modules/vegas/dist/overlays/03.png" style="background-image: url(/dist/img/vegas/overlays/03.png);">03</li>
+                            <li class="overlay-select" data-value="../node_modules/vegas/dist/overlays/04.png" style="background-image: url(/dist/img/vegas/overlays/04.png);">04</li>
+                            <li class="overlay-select" data-value="../node_modules/vegas/dist/overlays/05.png" style="background-image: url(/dist/img/vegas/overlays/05.png);">05</li>
+                            <li class="overlay-select" data-value="../node_modules/vegas/dist/overlays/06.png" style="background-image: url(/dist/img/vegas/overlays/06.png);">06</li>
+                            <li class="overlay-select" data-value="../node_modules/vegas/dist/overlays/07.png" style="background-image: url(/dist/img/vegas/overlays/07.png);">07</li>
+                            <li class="overlay-select" data-value="../node_modules/vegas/dist/overlays/08.png" style="background-image: url(/dist/img/vegas/overlays/08.png);">08</li>
+                            <li class="overlay-select" data-value="../node_modules/vegas/dist/overlays/09.png" style="background-image: url(/dist/img/vegas/overlays/09.png);">09</li>
+                        </ul>
+                    </div>
+                    <div class="form-group">
+                        <label for="settings-shuffle">Shuffle (Required):</label>
+                        <select class="form-control" id="settings-shuffle">
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="settings-timer">Timer (Required):</label>
+                        <select class="form-control" id="settings-timer">
+                            <option value="yes">Yes</option>
+                            <option value="no">No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="button" class="btn btn-primary" id="settings-save">Save</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title m-0">Change Password</h5>
+                </div>
+                <div class="card-body">
+                    <div class="form-group">
+                        <label for="settings-new-password">New Password (Required):</label>
+                        <input type="password" class="form-control" id="settings-new-password" placeholder="New Password">
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password-again">Verify New Password (Required):</label>
+                        <input type="password" class="form-control" id="settings-new-password-again" placeholder="Verify New Password">
+                    </div>
+                    <div class="form-group">
+                        <label for="current-password">Current Password (Required):</label>
+                        <input type="password" class="form-control" id="settings-current-password" placeholder="Current Password">
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <button type="button" class="btn btn-primary" id="settings-password-save">Save</button>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title m-0">Reboot Machine</h5>
+                </div>
+                <div class="card-footer">
+                    <button type="button" class="btn btn-primary" id="settings-reboot-now">Reboot Now!</button>
+                </div>
+            </div>
+            
+          </div>
+
+        </div>
+        <!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content -->

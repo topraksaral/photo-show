@@ -1,0 +1,35 @@
+{
+  "name": "photo-view",
+  "version": "1.0.0",
+  "description": "Hop hop",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "author": "Toprak Saral",
+  "devDependencies": {
+    "electron": "^15.3.0"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "bootstrap": "^5.1.3",
+    "diet": "^0.16.0",
+    "diet-cookies": "^1.0.0",
+    "diet-ect": "^1.0.0",
+    "diet-ect-fix": "^1.0.1",
+    "diet-static": "^2.2.0",
+    "diet-static-middleware": "^1.0.0",
+    "electron-rebuild": "^3.2.3",
+    "electron-shutdown-command": "^2.0.1",
+    "extract-zip": "^2.0.1",
+    "formidable": "^2.0.1",
+    "jquery": "^3.6.0",
+    "mime": "^1.6.0",
+    "query-string": "^7.0.1",
+    "randomstring": "^1.2.1",
+    "sequelize": "^6.8.0",
+    "sqlite3": "^5.0.2",
+    "vegas": "^2.5.4",
+    "wifi-control": "github:topraksaral/wifi-control-node"
+  }
+}

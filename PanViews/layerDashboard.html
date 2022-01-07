@@ -1,0 +1,151 @@
+
+    <!-- Main content -->
+    <div class="content" style="display: none;" id="layer-dashboard">
+        <div class="container">
+        <div class="row">
+          <div class="col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <button type="button" class="btn btn-success" id="add-media-button">Add Media</button>
+                </div>
+              <div class="card-body" id="dashboard-card">
+                <div class="dashboard-not-found" id="dashboard-not-found">
+                    <p class="card-text">There is no media..</p>
+                </div>
+                <div class="row" id="dashboard-data">
+
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <!-- /.row -->
+      </div><!-- /.container-fluid -->
+    </div>
+    <!-- /.content -->
+<div style="display: none;" id="dashboard-object-template">
+    <div class="col-6 col-sm-4 col-md-3 col-lg-2 dashboard-item-parent" id="dashboard-object-{id}" data-id="{id}">
+        <a class="btn btn-app dashboard-item-move">
+            <i class="fas fa-expand-arrows-alt"></i>
+        </a>
+        <div class="dashboard-item">
+            <div class="dashboard-item-image" onclick="return openImage({id})"></div>
+            <div class="dashboard-item-title">{title}</div>
+            <div class="dashboard-item-label">
+                <span class="badge bg-success" id="dashboard-object-{id}-show-active">Active</span>
+                <span class="badge bg-danger" id="dashboard-object-{id}-show-passive">Passive</span>
+            </div>
+            <div class="dashboard-item-actions">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Action 
+                    <div class="dropdown-menu" role="menu">
+                        <a class="dropdown-item" href="#" onclick="return editItem({id});"> Edit</a>
+                        <a class="dropdown-item" id="dashboard-object-{id}-make-passive" href="#" onclick="return passiveActiveRemoveItem({id}, 'passive');"> Make Passive</a>
+                        <a class="dropdown-item" id="dashboard-object-{id}-make-active" href="#" onclick="return passiveActiveRemoveItem({id}, 'active');"> Make Active</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#" style="color: #FF0000;" onclick="return passiveActiveRemoveItem({id}, 'remove');"> Remove</a>
+                    </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="upload-template" style="display: none;">
+  <input type="file" id="upload-file">
+</div>
+
+  <div class="modal fade" id="show-image-modal">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">View Media</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <img src="" id="show-image-modal-image" style="width: 100%; display: none;">
+            <video controls src="" id="show-image-modal-video" style="width: 100%; display: none; height: 300px;">
+        </div>
+        <div class="modal-footer justify-content-between">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->
+
+  <div class="modal fade" id="edit-image-modal">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h4 class="modal-title">Edit Media</h4>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+            <div class="alert alert-danger" id="danger-alert-edit-modal" role="alert" style="display: none;"></div>
+            <input type="hidden" id="edit-image-modal-id">
+            <div class="form-group">
+                <label for="edit-image-modal-title">Title:</label>
+                <input type="text" class="form-control" id="edit-image-modal-title" placeholder="Title">
+            </div>
+            <div class="form-group">
+                <label for="edit-image-modal-color">Color (Required):</label>
+                <input type="text" class="form-control" id="edit-image-modal-color" placeholder="Color">
+            </div>
+            <div class="form-group">
+                <label for="edit-image-modal-transition">Transition (Required):</label>
+                <input type="hidden" id="edit-image-modal-transition">
+                <div id="edit-vegas" class="edit-vegas"></div>
+                <ul class="button-list transition-list">
+                    <li class="transition-edit-select" data-value="fade">fade</li>
+                    <li class="transition-edit-select" data-value="fade2">fade2</li>
+                    <li class="transition-edit-select" data-value="slideLeft">slideLeft</li>
+                    <li class="transition-edit-select" data-value="slideLeft2">slideLeft2</li>
+                    <li class="transition-edit-select" data-value="slideRight">slideRight</li>
+                    <li class="transition-edit-select" data-value="slideRight2">slideRight2</li>
+                    <li class="transition-edit-select" data-value="slideUp">slideUp</li>
+                    <li class="transition-edit-select" data-value="slideUp2">slideUp2</li>
+                    <li class="transition-edit-select" data-value="slideDown">slideDown</li>
+                    <li class="transition-edit-select" data-value="slideDown2">slideDown2</li>
+                    <li class="transition-edit-select" data-value="zoomIn">zoomIn</li>
+                    <li class="transition-edit-select" data-value="zoomIn2">zoomIn2</li>
+                    <li class="transition-edit-select" data-value="zoomOut">zoomOut</li>
+                    <li class="transition-edit-select" data-value="zoomOut2">zoomOut2</li>
+                    <li class="transition-edit-select" data-value="swirlLeft">swirlLeft</li>
+                    <li class="transition-edit-select" data-value="swirlLeft2">swirlLeft2</li>
+                    <li class="transition-edit-select" data-value="swirlRight">swirlRight</li>
+                    <li class="transition-edit-select" data-value="swirlRight2">swirlRight2</li>
+                    <li class="transition-edit-select" data-value="burn">burn</li>
+                    <li class="transition-edit-select" data-value="burn2">burn2</li>
+                    <li class="transition-edit-select" data-value="blur">blur</li>
+                    <li class="transition-edit-select" data-value="blur2">blur2</li>
+                    <li class="transition-edit-select" data-value="flash">flash</li>
+                    <li class="transition-edit-select" data-value="flash2">flash2</li>
+                </ul>
+            </div>
+            <div class="form-group">
+                <label for="edit-image-modal-transition-duration">Transition Duration (Sec) (Required):</label>
+                <input type="number" class="form-control numericOnly" pattern="[0-9]*" min="1" id="edit-image-modal-transition-duration" placeholder="Transition Duration">
+            </div>
+            <div class="form-group">
+                <label for="edit-image-modal-delay">Delay (Sec) (Required):</label>
+                <input type="number" class="form-control numericOnly" pattern="[0-9]*" min="1" id="edit-image-modal-delay" placeholder="Delay">
+            </div>
+        </div>
+        <div class="modal-footer justify-content-between">
+          <button type="button" class="btn btn-primary" id="edit-image-modal-save">Save</button>
+          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        </div>
+      </div>
+      <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+  </div>
+  <!-- /.modal -->

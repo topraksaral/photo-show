@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="tr">
+    <head>
+        <meta charset="utf8">
+        <title>Photo View</title>
+        <link rel="stylesheet" href="../node_modules/bootstrap/dist/css/bootstrap.css">
+        <link rel="stylesheet" href="../node_modules/vegas/dist/vegas.css">
+        <link rel="stylesheet" href="./fonts/raleway.css">
+        <style>
+            body {
+                -webkit-touch-callout: none;
+                -webkit-user-select: none;
+                -khtml-user-select: none;
+                -moz-user-select: none;
+                -ms-user-select: none;
+                user-select: none;
+                overflow: hidden;
+            }
+            #vegas {
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+            }
+            /* raleway-regular - vietnamese_latin-ext_latin_cyrillic-ext_cyrillic */
+            .file-title {
+                font-weight: 900;
+                font-family: "Raleway";
+                position: fixed;
+                z-index: 8888;
+                background-color: rgba(0, 0, 0, .3);
+                width: 60%;
+                left: 50%;
+                bottom: -50px;
+                transform: translate(-50%, -50%);
+                margin: 0 auto;
+                border-radius: 7px;
+                padding: 10px;
+                text-align: center;
+                font-size: 1.3em;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .controller {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                z-index: 9998;
+                background-color: rgba(0, 0, 0, .3);
+                opacity: 0;
+            }
+            .controller-back {
+                position: absolute;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                right: 0;
+            }
+            .controller-win, .network-password {
+                position: absolute;
+                width: 60%;
+                left: 20%;
+                top: 5%;
+                background: #000;
+                border-radius: 7px;
+                box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+                color: rgb(168, 168, 168);
+                font-family: "Verdana";
+                font-weight: 300;
+                font-size: 0.9em;
+              }
+              .network-password {
+                height: 0;
+                overflow: hidden;
+                z-index: 9999;
+                text-align: center;
+              }
+              .controller-win, .network-disconnect {
+                position: absolute;
+                width: 60%;
+                left: 20%;
+                top: 5%;
+                background: #000;
+                border-radius: 7px;
+                box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+                color: rgb(168, 168, 168);
+                font-family: "Verdana";
+                font-weight: 300;
+                font-size: 0.9em;
+              }
+              .network-disconnect {
+                height: 0;
+                overflow: hidden;
+                z-index: 9999;
+                text-align: center;
+              }
+              .network-disconnect-alert {
+                  margin: 30px;
+              }
+              .network-status {
+                  padding: 10px;
+                  border-bottom: 1px solid rgb(59, 59, 59);
+              }
+              .network-status-title {
+                text-align: right;
+                font-weight: bold;
+              }
+              .network-connector-div {
+                  text-align: center;
+                  height: 0;
+                  overflow: hidden;
+              }
+              .network-connector {
+                  margin-top: 10px;
+                  overflow: hidden;
+              }
+              .network-connector-loading {
+                  text-align: center;
+                  height: 0;
+                  overflow: hidden;
+              }
+              .network-connector-selector {
+                    height: 0;
+                    overflow: hidden;
+                    overflow-y: scroll;
+              }
+
+            .network-password-input {
+                margin: 6px 20px;
+                border: 1px solid #CCC;
+                border-radius: 5px;
+                /* padding: 5px; */
+                height: 40px;
+                font-size: 25px;
+                background-color: #fff;
+                color: #000;
+                text-align: left;
+            }
+
+              .wifi-item {
+                  width: 100%;
+                  height: 45px;
+                  border-bottom: 1px solid #CCC;
+              }
+              .wifi-item:hover {
+                  background:rgb(255, 255, 255, 0.1) 
+              }
+              .wifi-item-ok {
+                  width: 45px;
+                  height: 45px;
+                  float: left;
+              }
+              .wifi-item-name {
+                  height: 45px;
+                  padding:0 45px 0 25;
+                  line-height: 45px;
+              }
+              .wifi-item-level {
+                  width: 20px;
+                  margin-right: 5px;
+                  height: 37px;
+                  float: right;
+                  margin-top: 4px;
+                  border: solid 1px rgb(59, 59, 59);
+                  border-radius: 3px;
+                  position: relative;
+              }
+              .wifi-item-level > div {
+                  background-color: #198754;
+                  position: absolute;
+                  bottom: 0;
+                  left: 0;
+                  width: 100%;
+                  height: 0px;
+              }
+              .wifi-item-level-20 {
+                height: 20% !important;
+              }
+              .wifi-item-level-40 {
+                height: 40% !important;
+              }
+              .wifi-item-level-60 {
+                height: 60% !important;
+              }
+              .wifi-item-level-80 {
+                height: 80% !important;
+              }
+              .wifi-item-level-100 {
+                height: 100% !important;
+              }
+              .connectok {
+                  background: url("data:image/png;base64,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") no-repeat center center;
+                  background-size: 30px 30px;
+              }
+        </style>
+    </head>
+    <body>
+        <div id="vegas"></div>
+        <div class="controller">
+            <div class="controller-back" onclick="return closeTouch();"></div>
+            <div class="controller-win">
+                <div class="network-status">
+                    <button class="btn btn-info" id="tablet-mode">Go Tablet Mode</button>
+                    <div class="row">
+                        <div class="col col-xs-4 network-status-title">Network:</div>
+                        <div class="col col-xs-8" id="network-status-span">Waiting..</div>
+                    </div>
+                    <div class="row">
+                        <div class="col col-xs-4 network-status-title">Control Address:</div>
+                        <div class="col col-xs-8" id="network-control-address-span">Waiting..</div>
+                    </div>
+                    <div class="row">
+                        <div class="col col-xs-4 network-status-title">Wifi Status:</div>
+                        <div class="col col-xs-8" id="network-wifi-span">Waiting..</div>
+                    </div>
+                    <div class="row network-connector-div" id="network-connector-div">
+                        <div class="col">
+                            <button class="btn btn-success" id="list-connect-network">Connect Network</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="network-connector">
+                    <div class="network-connector-loading" id="network-connector-loading">
+                        <img src="../Static/dist/img/loading.gif" width="100">
+                    </div>
+                    <div class="network-connector-selector" id="network-connector-selector">
+
+                    </div>
+                </div>
+            </div>
+            
+            <div class="network-password" id="network-password">
+                <h4>Password: </h4>
+                <div class="network-password-input" id="network-password-input"></div>
+                <div class="network-password-keyboard" id="keyboard">
+                    
+                </div>
+                <div class="network-password-keyboard">
+                    <button class="btn btn-success" id="connect-network-action">Connect</button>
+                    <button class="btn btn-danger" id="close-network-password">Cancel</button>
+                </div>
+            </div>
+            <div class="network-disconnect" id="network-disconnect">
+                <div class="network-disconnect-alert">Are you sure to disconnect this connection?</div>
+                <button class="btn btn-success" id="disconnect-network-action">Disconnect</button>
+                <button class="btn btn-danger" id="close-network-disconnect">Cancel</button>
+            </div>
+        </div>
+        <div class="file-title" id="file-title"></div>
+
+        <div class="modules" id="modules"></div>
+
+        <div id="wifi-item-template" style="display: none;">
+            <div class="wifi-item" data-ssid="{ssid}" onclick="return connectWifi('{ssid}', '{contype}');">
+                <div class="wifi-item-ok {connectok}"></div>
+                <div class="wifi-item-level">
+                    <div class="wifi-item-level-{signal_level}"></div>
+                </div>
+                <div class="wifi-item-name">{ssid}</div>
+            </div>
+        </div>
+        <script>
+            window.$ = window.jQuery = require('jquery');
+            window.electron = require('electron');
+        </script>
+        <script src="../node_modules/bootstrap/dist/js/bootstrap.js"></script>
+        <script src="../node_modules/vegas/dist/vegas.js"></script>
+        <script src="./extensions/Keyboard.class.js"></script>
+
+        <script>
+            var vegas = null;
+            var vegasSettings = {};
+            var titleActive = false;
+            var settingsWin = false;
+            var wifiSearchInterval = null;
+            var connectorStatus = false;
+            var availableModules = {};
+            var moduleFileUrl = '';
+
+            var selectedSsid = '';
+            var input = '';
+
+            const { ipcRenderer } = electron;
+            ipcRenderer.on('started-settings', function (event, store) {
+                if(store.overlayMode != 'yes'){
+                    store.overlay = false;
+                }
+                vegasSettings = store;
+                vegasSettings.walk = function(index, slideSettings){
+                    if(slideSettings.title == null){
+                        if(titleActive){
+                            closeTitle(false);
+                        }
+                    }else{
+                        if(titleActive){
+                            closeTitle(true, slideSettings.title, slideSettings.color);
+                        }else{
+                            openTitle(slideSettings.title, slideSettings.color);
+                        }
+                    }
+                }
+                vegasObj = $("#vegas");
+                vegasObj.vegas(vegasSettings);
+            });
+
+            ipcRenderer.on('updated-settings', function (event, store) {
+                if(store.overlayMode != 'yes')
+                    store.overlay = false;
+
+                vegasSettings.color = store.color;
+                vegasSettings.delay = store.delay;
+                vegasSettings.overlay = store.overlay;
+                vegasSettings.overlayMode = store.overlayMode;
+                vegasSettings.shuffle = store.shuffle;
+                vegasSettings.timer = store.timer;
+
+                if(vegasObj !== null){
+                    vegasObj.vegas('destroy');
+                    vegasObj.html('');
+                    vegasObj = null;
+                }
+
+                vegasObj = $("#vegas");
+                vegasObj.vegas(vegasSettings);
+            });
+
+            ipcRenderer.on('wifi-search', function(event, store){
+
+                if(!connectorStatus)
+                    return false;
+
+                $('#network-connector-selector').html('');
+                var z = 0;
+                store.networks.sort(function(a, b) {          
+                    if (a.isConnected === b.isConnected) {
+                        if(a.ssid < b.ssid)
+                            return -1;
+                        if(a.ssid > b.ssid)
+                            return 1;
+
+                        return 0;
+                    }
+                    if(a.isConnected)
+                        return -1;
+                    else
+                        return 1;
+                });
+                for(var i=0;i<store.networks.length;i++){
+
+                    var signalLvl = 0;
+                    if(store.networks[i].signal_level < -70)
+                        signalLvl = 20;
+                    else if(store.networks[i].signal_level < -67)
+                    signalLvl = 40;
+                    else if(store.networks[i].signal_level < -60)
+                        signalLvl = 60;
+                    else if(store.networks[i].signal_level < -50)
+                        signalLvl = 80;
+                    else if(store.networks[i].signal_level < -30)
+                        signalLvl = 100;
+
+                    if(signalLvl == 0)
+                        continue;
+
+                    var connectOk = '';
+                    if(store.networks[i].isConnected)
+                        connectOk = 'connectok';
+                    
+                    var obj = $('#wifi-item-template').html();
+                    obj = obj.replace(/{ssid}/g, store.networks[i].ssid);
+                    obj = obj.replace(/{connectok}/g, connectOk);
+                    obj = obj.replace(/{contype}/g, connectOk);
+                    
+                    
+                    obj = obj.replace(/{signal_level}/g, signalLvl);
+
+                    $('#network-connector-selector').append(obj);
+                    z++;
+                }
+
+                if(z == 0){
+                    $('#network-connector-loading').animate({
+                        height: 120
+                    }, 500);
+                    $('#network-connector-selector').animate({
+                        height: 0
+                    }, 500);
+                }else{
+                    $('#network-connector-loading').animate({
+                        height: 0
+                    }, 500);
+                    $('#network-connector-selector').animate({
+                        height: 250
+                    }, 500);
+                }
+                wifiSearchInterval = setTimeout(function(){
+                    ipcRenderer.send('wifi-search', 'ping');
+                }, 15000);                
+            });
+            ipcRenderer.on('network-status', function(event, store){
+
+                var networkStatus = (store.status ? 'Active' : 'Passive');
+                $('#network-status-span').html(networkStatus);
+
+                $('#network-control-address-span').html(store.address);
+                
+                var wifiStatus = 'Not Connected';
+                if(store.wifiStatus == -2)
+                    wifiStatus = 'Control Error';
+                else if(store.wifiStatus == -1)
+                    wifiStatus = 'Power Off';
+                else if(store.wifiStatus == 1)
+                    wifiStatus = 'Connected';
+
+                $('#network-wifi-span').html(wifiStatus);
+
+                if(store.wifiStatus >= 0){
+                    $('#network-connector-div').find('button').html((store.wifiStatus == 1 ? 'Change Network' : 'Connect a Network'));
+                    $('#network-connector-div').animate({
+                        height: 40,
+                        'margin-top': 40
+                    }, 500);
+                }else{
+                    $('#network-connector-div').animate({
+                        height: 0,
+                        'margin-top': 0
+                    }, 500);
+
+                    if(wifiSearchInterval != null){
+                        clearTimeout(wifiSearchInterval);
+                        wifiSearchInterval = null;
+
+                        $('#network-connector-loading').css('height', '0');
+                        $('#network-connector-selector').css('height', '0');
+                    }
+                }
+            });
+
+            ipcRenderer.on('updated-files', function(event, store){
+                vegasSettings.slides = store.slides;
+
+                if(vegasObj !== null){
+                    vegasObj.vegas('destroy');
+                    vegasObj.html('');
+                    vegasObj = null;
+                }
+
+                vegasObj = $("#vegas");
+                vegasObj.vegas(vegasSettings);
+            });
+
+            ipcRenderer.on('updated-modules', function(event, store){
+
+                if(store.url)
+                    moduleFileUrl = store.url;
+
+                for (const [key, value] of Object.entries(availableModules)) {
+                    if(value != null)
+                        value.destroy();
+                    availableModules[key] = null;
+                }
+
+                $('#modules').html('');
+
+                var modules = store.modules;
+
+                for(var i=0;i<modules.length;i++){
+                    var module = modules[i];
+                
+                    var obj = $('<div></div>');
+                    obj.attr('id', module.key);
+                    obj.addClass('module');
+                    obj.css('left', module.x);
+                    obj.css('top', module.y);
+                    obj.css('width', module.w);
+                    obj.css('height', module.h);
+                    obj.css('position', 'absolute');
+
+                    $('#modules').append(obj);
+
+                    loadScript(moduleFile('/'+module.key+'/module.js'), function(){
+                        availableModules.clock = new analogClock(obj, module.settings);
+                        availableModules.clock.run();
+                    });
+                }
+            });
+
+            ipcRenderer.on('wifi-disconnect', function(event, store){
+                $('#network-disconnect').animate({
+                    height: 0,
+                }, 500);
+            });
+            
+            ipcRenderer.on('wifi-connect', function(event, store){
+                $('#connect-network-action').prop('disabled', false);
+                $('#close-network-password').prop('disabled', false);
+                if(!store.success){
+                    $('#keyboard').html(store.msg);
+
+                }else{
+                    $('#close-network-password').trigger('click');
+                }
+            });
+
+            function closeTitle(reopen, openStr = '', openColor = ''){
+                setTimeout(function(){
+                    var bottom = parseInt($('#file-title').css('bottom'));
+                    if(bottom > -50){
+                        bottom = bottom-2;
+                        $('#file-title').css('bottom', bottom+'px');
+
+                        closeTitle(reopen, openStr, openColor);
+                    }else{
+                        titleActive = false;
+                        $('#file-title').html('');
+                        if(reopen){
+                            openTitle(openStr, openColor);
+                        }
+                    }
+                }, 10);
+            }
+
+            function openTitle(openStr, openColor = ''){
+                $('#file-title').html(openStr);
+
+                if(openColor != '')
+                    $('#file-title').css('color', openColor);
+                setTimeout(function(){
+                    var bottom = parseInt($('#file-title').css('bottom'));
+                    if(bottom < 20){
+                        bottom = bottom+2;
+                        $('#file-title').css('bottom', bottom+'px');
+
+                        openTitle(openStr);
+                    }else{
+                        titleActive = true;
+                    }
+                }, 10);
+            }
+
+            $('body').on('click', function(e){
+                openTouch();
+            });
+
+            $('#disconnect-network-action').on('click', function(){
+                ipcRenderer.send('wifi-disconnect', selectedSsid);
+            });
+
+            $('#connect-network-action').on('click', function(){
+                if(selectedSsid == '' || input == ''){
+                    $('#keyboard').html('The Password Won\'t be empty.');
+
+                    return false;
+                }
+                $('#keyboard').html('');
+                $('#connect-network-action').prop('disabled', false);
+                $('#close-network-password').prop('disabled', false);
+
+                ipcRenderer.send('wifi-connect', {
+                    selectedSsid: selectedSsid,
+                    input: input,
+                });
+            });
+
+            $('#list-connect-network').on('click', function(){
+                if(connectorStatus){
+                    clearTimeout(wifiSearchInterval);
+                    wifiSearchInterval = null;
+                    $('#network-connector-loading').animate({
+                        height: 0
+                    }, 500);
+                    $('#network-connector-selector').animate({
+                        height: 0
+                    }, 500);
+                    connectorStatus = false;
+                }else{
+                    $('#network-connector-loading').animate({
+                        height: 120
+                    }, 500);
+                    $('#network-connector-selector').animate({
+                        height: 0
+                    }, 500);
+
+                    ipcRenderer.send('wifi-search', 'ping');
+                    connectorStatus = true;
+                }
+            });
+
+            function openTouch(){
+                if(settingsWin)
+                    return false;
+
+                settingsWin = true;
+                $('.controller').animate({
+                    opacity: 1
+                }, 500);
+            }
+
+            function closeTouch(){
+                if(!settingsWin)
+                    return false;
+                
+                $('.controller').animate({
+                    opacity: 0
+                }, 500);
+                setTimeout(function(){
+                    $('#network-connector-loading').css('height', '0');
+                    $('#network-connector-selector').css('height', '0');
+                    settingsWin = false;
+                }, 500);
+
+                if(connectorStatus){
+                    clearTimeout(wifiSearchInterval);
+                    wifiSearchInterval = null;
+                    connectorStatus = false;
+
+                    $('#network-connector-loading').animate({
+                        height: 0
+                    }, 500);
+                    $('#network-connector-selector').animate({
+                        height: 0
+                    }, 500);
+
+                    $('#network-connector-selector').html('');
+                }
+
+                return false;
+            }
+
+            function connectWifi(ssid, type){
+                selectedSsid = ssid;
+                input = '';
+                if(type == 'connectok'){
+                    $('#network-disconnect').animate({
+                        height: $('.controller-win').outerHeight(),
+                    }, 500);
+
+                    return false;
+                }
+
+                $('#network-password-input').html('');
+                $('#network-password').animate({
+                    height: $('.controller-win').outerHeight(),
+                }, 500);
+                //ipcRenderer.send('wifi-search', 'ping');
+                console.log(ssid);
+            }
+            
+            function moduleFile(name){
+                return moduleFileUrl+name;
+            }
+            function loadScript(url, callback){
+                if(isScriptAlreadyIncluded(url)){
+                    return callback();
+                }
+                // Adding the script tag to the head as suggested before
+                var head = document.head;
+                var script = document.createElement('script');
+                script.type = 'text/javascript';
+                script.src = url;
+
+                // Then bind the event to the callback function.
+                // There are several events for cross browser compatibility.
+                script.onreadystatechange = callback;
+                script.onload = callback;
+
+                // Fire the loading
+                head.appendChild(script);
+            }
+            function isScriptAlreadyIncluded(src){
+                var scripts = document.getElementsByTagName("script");
+                for(var i = 0; i < scripts.length; i++) 
+                    if(scripts[i].getAttribute('src') == src)
+                        return true;
+                    
+                return false;
+            }
+            $('#close-network-password').on('click', function(){
+                selectedSsid = '';
+
+                $('#network-password').animate({
+                    height: 0,
+                }, 500);
+            });
+
+            $('#close-network-disconnect').on('click', function(){
+                selectedSsid = '';
+                $('#network-disconnect').animate({
+                    height: 0,
+                }, 500);
+            });
+
+            $('#tablet-mode').on('click', function(){
+                ipcRenderer.send('tablet-mode', 'ping');
+            });
+
+            var keyboard = null;
+            function setKeyboard(){
+                keyboard = new Keyboard();
+                $('body').prepend(keyboard.object);
+
+                $('#network-password-input').on('click', function(){
+                    keyboard.open($(this), input, 32, (newValue) => {
+                        $('#network-password-input').html(encodeHTMLEntities(newValue));
+                        input = newValue;
+                    });
+                });
+                
+            }
+
+            function encodeHTMLEntities(text) {
+                return String(text).replace(/ /g, '&nbsp;');
+            }
+            function decodeHTMLEntities(text) {
+                return String(text).replace(/&nbsp;/g, ' ');
+            }
+
+            setKeyboard();
+        </script>
+    </body>
+</html>

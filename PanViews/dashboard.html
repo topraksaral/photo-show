@@ -1,0 +1,1431 @@
+<!DOCTYPE html>
+<!--
+This is a starter template page. Use this page to start your new project from
+scratch. This page gets rid of all links and provides the needed markup only.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Photo Viewer | Control</title>
+
+  <link rel="stylesheet" href="/plugins/jquery-ui/jquery-ui.css">
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="/gfont/css.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/dist/css/adminlte.min.css">
+
+
+  <link rel="stylesheet" href="/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css">
+  <link rel="stylesheet" href="/plugins/bootstrap-slider/css/bootstrap-slider.min.css">
+  <link rel="stylesheet" href="/plugins/vegas/vegas.css">
+  
+  <style>
+    .button-list {
+        list-style: none;
+        padding: 0;
+        overflow: hidden;
+        font-size: 12px;
+        color: #ffffff;
+    }
+    .button-list li {
+        border: 2px solid #222;
+        border-bottom: 2px solid #222;
+        width: 25%;
+        margin: 0;
+        height: 40px;
+        line-height: 35px;
+        text-align: center;
+        float: left;
+        background: #333;
+        cursor: pointer;
+        -webkit-transition: .5s border-color;
+        transition: .5s border-color;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        overflow: hidden;
+    }
+    .overlay-list li {
+        width: 31.333333%;
+        margin: 1%;
+        height: 60px;
+        line-height: 60px;
+        background-color: #444;
+        border: 1px solid #000;
+    }
+    .button-list .active {
+        background: #222;
+        border-color: #8fcec8;
+        color: #8fcec8;
+        font-weight: bold;
+        font-size: 18px;
+    }
+
+    .dashboard-not-found, .modules-not-found {
+        text-align: center;
+
+    }
+    .dashboard-item, .modules-item {
+        margin: 6px 1px;
+        text-align: center;
+        padding-bottom: 10px;
+        border-radius: 6px;
+        box-shadow: 0 0 1px rgb(0 0 0 / 13%), 0 1px 3px rgb(0 0 0 / 20%);
+    }
+    .dashboard-item-image {
+        height: 100px;
+        border-top-left-radius: 6px;
+        border-top-right-radius: 6px;
+        background-size: cover;
+        background-repeat: no-repeat;
+        background-position: center;
+        cursor: pointer;
+    }
+    .dashboard-item .dashboard-item-title, .dashboard-item-label, .modules-item .modules-item-title, .modules-item-label {
+        margin-top: 7px;
+        margin-bottom: 7px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        padding-left: 3px;
+        padding-right: 3px;
+    }
+    .dashboard-item-parent .dashboard-item-move {
+        position: absolute;
+        height: 40px;
+        padding: 9px 5px;
+        min-width: 40px;
+        width: 40px;
+        top: -2px;
+        left: 0;
+        margin: 0;
+        z-index: 999;
+        cursor: move !important;
+    }
+    
+    .edit-vegas {
+        height: 300px;
+        margin-bottom: 10px;
+    }
+
+    .edit-module-settings-position-area {
+        background-color: #cccccc;
+        border: 1px solid #999999;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    .edit-module-settings-position {
+        position: absolute;
+        background-color: #999999;
+        border: 1px solid #555555;
+        cursor: move;
+    }
+  </style>
+</head>
+<body class="hold-transition layout-top-nav">
+<div class="wrapper">
+
+  <!-- Navbar -->
+  <nav class="main-header navbar navbar-expand-md navbar-light navbar-white">
+    <div class="container">
+      <a href="#" onclick="return openPage('dashboard');" class="navbar-brand">
+        <span class="brand-text font-weight-light">Photo Viewer</span>
+      </a>
+
+      <button class="navbar-toggler order-1" type="button" data-toggle="collapse" data-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+
+      <div class="collapse navbar-collapse order-3" id="navbarCollapse">
+        <!-- Left navbar links -->
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a href="#" class="nav-link" id="menu-dashboard" onclick="return openPage('dashboard')">Dashboard</a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link" id="menu-modules" onclick="return openPage('modules')">Modules</a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link" id="menu-settings" onclick="return openPage('settings')">Settings</a>
+          </li>
+          <li class="nav-item">
+            <a href="#" class="nav-link" onclick="return openPage('logout')">Logout</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <!-- /.navbar -->
+
+    <!-- Content Wrapper. Contains page content -->
+    <div class="content-wrapper">
+        <!-- Content Header (Page header) -->
+        <div class="content-header">
+          <div class="container">
+            <div class="row mb-2">
+              <div class="col-sm-12">
+                <h1 class="m-0" id="page-title"></h1>
+                <div style="padding: 0 20px;">
+                    <div class="alert alert-danger" id="danger-alert" role="alert" style="display: none; margin-top: 20px;"></div>
+                    <div class="alert alert-success" id="success-alert" role="alert" style="display: none; margin-top: 20px;"></div>
+                </div>
+              </div><!-- /.col -->
+            </div><!-- /.row -->
+          </div><!-- /.container-fluid -->
+          
+        </div>
+        <!-- /.content-header -->
+    
+  {{ include 'layerDashboard' }}
+
+  {{ include 'layerModules' }}
+
+  {{ include 'layerSettings' }}
+
+  {{ include 'layerCredits' }}
+
+    </div>
+    <!-- /.content-wrapper -->
+
+  <!-- Control Sidebar -->
+  <aside class="control-sidebar control-sidebar-dark">
+    <!-- Control sidebar content goes here -->
+  </aside>
+  <!-- /.control-sidebar -->
+
+  <!-- Main Footer -->
+  <footer class="main-footer">
+    <div class="float-right d-none d-sm-inline">
+        <a href="#" onclick=" return openPage('credits')">Credits</a>
+      </div>
+    <!-- Default to the left -->
+    <strong>Copyright &copy; 2021 <a href="https://serhatsaral.com">T. Serhat Saral</a>.</strong> All rights reserved.
+  </footer>
+</div>
+<!-- ./wrapper -->
+
+<!-- REQUIRED SCRIPTS -->
+
+<!-- jQuery -->
+<script src="/plugins/jquery/jquery.min.js"></script>
+<script src="/plugins/jquery-ui/jquery-ui.js"></script>
+<script src="/plugins/jquery-ui/jquery.ui.touch-punch.js"></script>
+
+<!-- Bootstrap 4 -->
+<script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<!-- AdminLTE App -->
+<script src="/dist/js/adminlte.min.js"></script>
+
+<script src="/plugins/Sortable-master/Sortable.min.js"></script>
+
+<script src="/plugins/bootstrap-colorpicker/js/bootstrap-colorpicker.min.js"></script>
+<script src="/plugins/bootstrap-slider/bootstrap-slider.min.js"></script>
+<script src="/plugins/bootstrap-switch/js/bootstrap-switch.min.js"></script>
+<script src="/plugins/vegas/vegas.js"></script>
+<script>
+
+    var settings = {
+        color: '{{-this.systemSettings.color}}',
+        delay: parseInt('{{-this.systemSettings.delay}}'),
+        overlay: '{{-this.systemSettings.overlay}}',
+        overlayMode: '{{-this.systemSettings.overlayMode}}',
+        shuffle: ('{{-this.systemSettings.shuffle}}' == 'true'),
+        timer: ('{{-this.systemSettings.timer}}' == 'true'),
+    };
+    var screen = {
+        w: '{{-this.screen.w}}',
+        h: '{{-this.screen.h}}'
+    }
+    var moduleSizes = {
+        x: 0,
+        y: 0,
+        w: 0,
+        h: 0,
+    }
+
+    var currentPage = '';
+    var titles = {
+        dashboard: 'Dashboard',
+        modules: 'Modules',
+        settings: 'Settings',
+        credits: 'Credits',
+    };
+
+    var items = [];
+    var modules = [];
+
+    $(document).ready(function(){
+        openPage('dashboard');
+
+        
+        //Dashboard
+        
+        $('#add-media-button').on('click', function(){
+            $('#upload-file').trigger('click');
+        });
+        
+        $('#add-module-button').on('click', function(){
+            $('#upload-module-file').trigger('click');
+        });
+        
+        $('#upload-module-file').on('change', function(){
+            $('#danger-alert').html('').css('display', 'none');
+            $('#success-alert').html('').css('display', 'none');
+            
+            var element = $(this)[0];
+            if(element.files.length != 1)
+                return;
+            
+            var file = element.files[0];
+            if(file.type != 'application/zip'){
+                $('#danger-alert').html('Invalid file type. Only allowed:zip').fadeIn('fast', function(){
+                    $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                });
+                $(this).val('');
+
+                return false;
+            }
+
+            dynamicLoading('#layer-modules');
+            
+            var formData = new FormData();
+            formData.append('file', file);
+
+            $(this).val('');
+
+            $.ajax({
+                url : '/upload-module',
+                type : 'POST',
+                data : formData,
+                processData: false,  // tell jQuery not to process the data
+                contentType: false,  // tell jQuery not to set contentType
+                success : function(data) {
+                    dynamicReady('#layer-modules');
+                    if(!data.status){
+                        $('#danger-alert-edit-modal').html(data.message).fadeIn('fast', function(){
+                            $("#edit-image-modal").animate({ scrollTop: $('#danger-alert-edit-modal').offset().top }, 500);
+                        });
+
+                        return;
+                    }
+
+                    $('#success-alert').html('Module Uploaded.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#success-alert').offset().top }, 500);
+                    });
+                    
+                    addModule(data.module);
+                    
+                    $('#modules-data').fadeIn('fast');
+                    $('#modules-not-found').fadeOut('fast');
+                },
+                error: function(data){
+                    dynamicReady('#layer-modules');
+                    $('#danger-alert-edit-modal').html('Something went wrong.').fadeIn('fast', function(){
+                        $("#edit-image-modal").animate({ scrollTop: $('#danger-alert-edit-modal').offset().top }, 500);
+                    });
+                }
+            });
+
+            return false;
+        });
+        
+        $('#upload-file').on('change', function(){
+            $('#danger-alert').html('').css('display', 'none');
+            $('#success-alert').html('').css('display', 'none');
+            
+            var element = $(this)[0];
+            if(element.files.length != 1)
+                return;
+            
+            var file = element.files[0];
+            if(file.type != 'image/png' && file.type != 'image/jpeg' && file.type != 'video/mp4'){
+                $('#danger-alert').html('Invalid file type. Only allowed:png, jpg, jpeg, mp4').fadeIn('fast', function(){
+                    $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                });
+                $(this).val('');
+
+                return false;
+            }
+
+            dynamicLoading('#layer-dashboard');
+            
+            var formData = new FormData();
+            formData.append('file', file);
+
+            $(this).val('');
+
+            $.ajax({
+                url : '/upload-file',
+                type : 'POST',
+                data : formData,
+                processData: false,  // tell jQuery not to process the data
+                contentType: false,  // tell jQuery not to set contentType
+                success : function(data) {
+                    dynamicReady('#layer-dashboard');
+                    if(!data.status){
+                        $('#danger-alert-edit-modal').html(data.message).fadeIn('fast', function(){
+                            $("#edit-image-modal").animate({ scrollTop: $('#danger-alert-edit-modal').offset().top }, 500);
+                        });
+
+                        return;
+                    }
+
+                    $('#success-alert').html('Media Uploaded.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#success-alert').offset().top }, 500);
+                    });
+                    
+                    $('#dashboard-data').fadeIn('fast');
+                    $('#dashboard-not-found').fadeOut('fast');
+
+                    addItem(data.item);
+
+                },
+                error: function(data){
+                    dynamicReady('#layer-dashboard');
+                    $('#danger-alert-edit-modal').html('Something went wrong.').fadeIn('fast', function(){
+                        $("#edit-image-modal").animate({ scrollTop: $('#danger-alert-edit-modal').offset().top }, 500);
+                    });
+                }
+            });
+
+            return false;
+        });
+
+
+        var el = document.getElementById('dashboard-data');
+        new Sortable(el, {
+            handle: '.dashboard-item-move', // handle's class
+            animation: 350,
+            onEnd: function(event){
+                moveSave(this.toArray());
+            }
+        });
+
+        $('#edit-vegas').vegas({
+            slides: [
+                { src: '/plugins/vegas/img/1.jpg' },
+                { src: '/plugins/vegas/img/2.jpg' },
+                { src: '/plugins/vegas/img/3.jpg' }
+            ],
+            transition: 'zoomOut2'
+        });
+
+        $('.transition-edit-select').on('click', function(e){
+            $('.transition-edit-select').removeClass('active');
+            $(this).addClass('active');
+
+            $('#edit-image-modal-transition').val($(this).attr('data-value'));
+            $('#edit-vegas').vegas('options', 'transition', $(this).attr('data-value'));
+        });
+
+        $('#edit-image-modal-save').on('click', function(e){
+            $('#danger-alert-edit-modal').html('').css('display', 'none');
+
+            var id = $('#edit-image-modal-id').val();
+            var title = $('#edit-image-modal-title').val();
+            var color = $('#edit-image-modal-color').val();
+            var transition = $('#edit-image-modal-transition').val();
+            var transitionDuration = $('#edit-image-modal-transition-duration').val();
+            var delay = $('#edit-image-modal-delay').val();
+
+            delay = parseInt(delay)*1000;
+            transitionDuration = parseInt(transitionDuration)*1000;
+
+            $("#edit-image-modal").animate({ scrollTop: 0 }, 500);
+            dynamicLoading('#edit-image-modal .modal-dialog');
+
+            $.ajax({
+                type: "POST",
+                url: '/update-file',
+                data: {
+                    id: id,
+                    title: title,
+                    color: color,
+                    transition: transition,
+                    transitionDuration: transitionDuration,
+                    delay: delay
+                },
+                success: function(data){
+                    dynamicReady('#edit-image-modal .modal-dialog');
+                   if(data.status != true){
+                        $('#danger-alert-edit-modal').html(data.message).fadeIn('fast', function(){
+                            $("#edit-image-modal").animate({ scrollTop: $('#danger-alert-edit-modal').offset().top }, 500);
+                        });
+
+                        return;
+                    }
+
+                    $("#edit-image-modal").modal('hide');
+                    
+                    $('#success-alert').html('Media Updated.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#success-alert').offset().top }, 500);
+                    });
+                    
+                    if(!title || title == '')
+                        title = null;
+
+                    $('#dashboard-object-'+id).find('.dashboard-item-title').html((title == null ? '[No Title]' : title));
+                    for(var i=0;i<items.length;i++){
+                        if(items[i].id == id){
+                            items[i].title = title;
+                            items[i].color = color;
+                            items[i].transition = transition;
+                            items[i].transitionDuration = transitionDuration;
+                            items[i].delay = delay;
+
+                            break;
+                        }
+                    }
+                },
+                error: function(data){
+                    dynamicReady('#edit-image-modal .modal-dialog');
+                    $('#danger-alert-edit-modal').html('Something went wrong.').fadeIn('fast', function(){
+                        $("#edit-image-modal").animate({ scrollTop: $('#danger-alert-edit-modal').offset().top }, 500);
+                    });
+                }
+            });
+        });
+        
+        //Modules:
+        $('#edit-module-modal-save').on('click', function(){
+            $('#danger-alert-module-edit-modal').html('').css('display', 'none');
+
+            var id = $('#edit-module-modal-id').val();
+            
+            var module = getModule(id);
+            if(module == null){
+                $('#danger-alert-module-edit-modal').html('Module not found.').fadeIn('fast', function(){
+                    $("#edit-module-modal").animate({ scrollTop: $('#danger-alert-module-edit-modal').offset().top }, 500);
+                });
+
+                return;
+            }
+
+            var settings = {};
+            var objects = $('.edit-module-input');
+            for(var i=0;i<objects.length;i++){
+                var obj = $(objects[i]);
+                var key = obj.attr('data-key');
+                var val = obj.val();
+
+                if(module.settings.settings[key].require && (val == '' || val == undefined || val == null)){
+                    $('#danger-alert-module-edit-modal').html(module.settings.settings[key]+' cannot be empty.').fadeIn('fast', function(){
+                        $("#edit-module-modal").animate({ scrollTop: $('#danger-alert-module-edit-modal').offset().top }, 500);
+                    });
+
+                    return;
+                }
+
+                if(obj.attr('type') == 'checkbox'){
+                    settings[key] = false;
+                    if(obj.is(':checked'))
+                        settings[key] = true;
+                }else{
+                    settings[key] = val;
+                }
+
+            }
+
+            dynamicLoading('#edit-module-modal .modal-dialog');
+            var sendData = {
+                    id: id,
+                    x: Math.round(moduleSizes.x),
+                    y: Math.round(moduleSizes.y),
+                    w: Math.round(moduleSizes.w),
+                    h: Math.round(moduleSizes.h),
+                    settings: settings
+                };
+            $.ajax({
+                type: "POST",
+                url: '/update-module',
+                data: sendData,
+                success: function(data){
+                    dynamicReady('#edit-module-modal .modal-dialog');
+                   if(data.status != true){
+                        $('#danger-alert-module-edit-modal').html(data.message).fadeIn('fast', function(){
+                            $("#edit-module-modal").animate({ scrollTop: $('#danger-alert-module-edit-modal').offset().top }, 500);
+                        });
+
+                        return;
+                    }
+
+                    $("#edit-module-modal").modal('hide');
+                    
+                    $('#success-alert').html('Module Updated.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#success-alert').offset().top }, 500);
+                    });
+
+                    for(var i=0;i<modules.length;i++){
+                        if(modules[i].id == id){
+                            modules[i].x = sendData.x;
+                            modules[i].y = sendData.y;
+                            modules[i].w = sendData.w;
+                            modules[i].h = sendData.h;
+                            modules[i].data = sendData.settings;
+
+                            break;
+                        }
+                    }
+                    console.log(data);
+                },
+                error: function(data){
+                    dynamicReady('#edit-module-modal .modal-dialog');
+                    $('#danger-alert-module-edit-modal').html('Something went wrong.').fadeIn('fast', function(){
+                        $("#edit-module-modal").animate({ scrollTop: $('#danger-alert-module-edit-modal').offset().top }, 500);
+                    });
+                }
+            });
+
+        });
+
+        //Settings:
+        
+
+        $('#settings-save').on('click', function(e){
+            $('#danger-alert').html('').css('display', 'none');
+            $('#success-alert').html('').css('display', 'none');
+
+            var color = $('#settings-color').val();
+            var delay = $('#settings-delay').val();
+            var overlayMode = $('#settings-overlay-mode').val();
+            var overlay = $('#settings-overlay').val();
+            var shuffle = $('#settings-shuffle').val();
+            var timer = $('#settings-timer').val();
+
+            delay = parseInt(delay)*1000;
+
+            var buttonOldHtml = $('#settings-save').html();
+            $('#settings-save').prop('disabled', true);
+
+            $('#settings-color').prop('disabled', true);
+            $('#settings-delay').prop('disabled', true);
+            $('#settings-overlay-mode').prop('disabled', true);
+            $('#settings-overlay').prop('disabled', true);
+            $('#settings-shuffle').prop('disabled', true);
+            $('#settings-timer').prop('disabled', true);
+
+            $('#settings-save').html('<i class="fas fa-spinner"></i>');
+            
+
+            $.ajax({
+                type: "POST",
+                url: '/update-settings-action',
+                data: {
+                    color: color,
+                    delay: delay,
+                    overlayMode: overlayMode,
+                    overlay: overlay,
+                    shuffle: shuffle,
+                    timer: timer
+                },
+                success: function(data){
+                    $('#settings-save').prop('disabled', false);
+
+                    $('#settings-color').prop('disabled', false);
+                    $('#settings-delay').prop('disabled', false);
+                    $('#settings-overlay-mode').prop('disabled', false);
+                    $('#settings-overlay').prop('disabled', false);
+                    $('#settings-shuffle').prop('disabled', false);
+                    $('#settings-timer').prop('disabled', false);
+
+                    $('#settings-save').html(buttonOldHtml);
+
+                    if(data.status != true){
+                        $('#danger-alert').html(data.message).fadeIn('fast', function(){
+                            $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                        });
+
+                        return;
+                    }
+
+                    $('#success-alert').html('Settings updated.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#success-alert').offset().top }, 500);
+                    });
+                    
+                    settings = {
+                        color: color,
+                        delay: parseInt(delay),
+                        overlay: overlay,
+                        overlayMode: overlayMode,
+                        shuffle: (shuffle == 'yes'),
+                        timer: (timer == 'yes'),
+                    };
+                },
+                error: function(data){
+                    $('#danger-alert').html('Something went wrong.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                    });
+
+                    $('#settings-save').prop('disabled', false);
+
+                    $('#settings-color').prop('disabled', false);
+                    $('#settings-delay').prop('disabled', false);
+                    $('#settings-overlay-mode').prop('disabled', false);
+                    $('#settings-overlay').prop('disabled', false);
+                    $('#settings-shuffle').prop('disabled', false);
+                    $('#settings-timer').prop('disabled', false);
+
+                    $('#settings-save').html(buttonOldHtml);
+
+                }
+            });
+        });
+
+        $('.overlay-select').on('click', function(e){
+            $('.overlay-select').removeClass('active');
+            $(this).addClass('active');
+
+            $('#settings-overlay').val($(this).attr('data-value'));
+        })
+        $('#settings-overlay-mode').on('change', function(e){
+            var val = $(this).val();
+            if(val == 'no'){
+                $('#settings-overlay-div').fadeOut('fast');
+
+                return;
+            }
+
+            $('#settings-overlay-div').fadeIn('fast');
+        });
+
+        $('#settings-reboot-now').on('click', function(e){
+            if(!confirm('Are You Sure?'))
+            return false;
+
+            $('#danger-alert').html('').css('display', 'none');
+            $('#success-alert').html('').css('display', 'none');
+
+            var buttonOldHtml = $('#settings-reboot-now').html();
+            $('#settings-reboot-now').prop('disabled', true);
+            $('#settings-reboot-now').html('<i class="fas fa-spinner"></i>');
+            
+            $.ajax({
+                type: "POST",
+                url: '/reboot-action',
+                data: {
+                },
+                success: function(data){
+                    $('#settings-reboot-now').prop('disabled', false);
+                    $('#settings-reboot-now').html(buttonOldHtml);
+
+                    if(data.status != true){
+                        $('#danger-alert').html(data.message).fadeIn('fast', function(){
+                            $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                        });
+
+                        return;
+                    }
+
+                    $('#success-alert').html('The system has been rebooted. Please wait for the device to boot up to take action.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                    });
+                },
+                error: function(data){
+                    $('#danger-alert').html('Something went wrong.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                    });
+
+                    $('#settings-reboot-now').prop('disabled', false);
+                    $('#settings-reboot-now').html(buttonOldHtml);
+                }
+            });
+
+            return false;
+        });
+
+        $('#settings-password-save').on('click', function(e){
+            $('#danger-alert').html('').css('display', 'none');
+            $('#success-alert').html('').css('display', 'none');
+
+            var newPassword = $('#settings-new-password').val();
+            var newPasswordAgain = $('#settings-new-password-again').val();
+            var password = $('#settings-current-password').val();
+            if(newPassword == '' || newPasswordAgain == '' || password == ''){
+                $('#danger-alert').html('All fields must be filled.').fadeIn('fast');
+
+                return false;
+            }
+
+            var buttonOldHtml = $('#settings-password-save').html();
+            $('#settings-password-save').prop('disabled', true);
+            $('#settings-new-password').prop('disabled', true);
+            $('#settings-new-password-again').prop('disabled', true);
+            $('#settings-current-password').prop('disabled', true);
+            $('#settings-password-save').html('<i class="fas fa-spinner"></i>');
+            
+            $.ajax({
+                type: "POST",
+                url: '/change-password-action',
+                data: {
+                    password: password,
+                    newPassword: newPassword,
+                    newPasswordAgain: newPasswordAgain
+                },
+                success: function(data){
+                    $('#settings-password-save').prop('disabled', false);
+                    $('#settings-new-password').prop('disabled', false);
+                    $('#settings-new-password-again').prop('disabled', false);
+                    $('#settings-current-password').prop('disabled', false);
+                    $('#settings-password-save').html(buttonOldHtml);
+
+                    if(data.status != true){
+                        $('#danger-alert').html(data.message).fadeIn('fast', function(){
+                            $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                        });
+
+                        return;
+                    }
+
+                    $('#success-alert').html('Password has been changed.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                    });
+                    
+                    $('#settings-new-password').val('');
+                    $('#settings-new-password-again').val('');
+                    $('#settings-current-password').val('');
+                },
+                error: function(data){
+                    $('#danger-alert').html('Something went wrong.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                    });
+
+                    $('#settings-password-save').prop('disabled', false);
+                    $('#settings-new-password').prop('disabled', false);
+                    $('#settings-new-password-again').prop('disabled', false);
+                    $('#settings-current-password').prop('disabled', false);
+                    $('#settings-password-save').html(buttonOldHtml);
+
+                }
+            });
+
+            return false;
+        });
+
+        //:End Settings
+    });
+
+    function openPage(page){
+        $('.navbar-collapse').collapse('hide');
+
+        $('.nav-link').removeClass('active');
+        $('#menu-'+page).addClass('active');
+
+        $('#danger-alert').html('').css('display', 'none');
+        $('#success-alert').html('').css('display', 'none');
+        
+        if(page == 'logout'){
+            logout();
+
+            return false;
+        }
+
+        if(currentPage == page)
+            return false;
+
+        runScripts(page);
+        $('#page-title').fadeOut('fast', function(){
+            $(this).html(titles[page]);
+            $(this).fadeIn('fast');
+        });
+
+        if(currentPage == '')
+            $('#layer-'+page).fadeIn('fast');
+        else
+            $('#layer-'+currentPage).fadeOut('fast', function(){
+                $('#layer-'+page).fadeIn('fast');
+            });
+
+        currentPage = page;
+  
+        return false;
+   }
+
+   function runScripts(page){
+        if(page == 'settings'){
+            $('#settings-new-password').val('');
+            $('#settings-new-password-again').val('');
+            $('#settings-current-password').val('');
+
+            $('#settings-color').val(settings.color).colorpicker('setValue', settings.color);
+            $('#settings-delay').val((settings.delay/1000));
+            $('#settings-overlay-mode').val(settings.overlayMode);
+
+            if(settings.shuffle)
+                $('#settings-shuffle').val('yes');
+            else
+                $('#settings-shuffle').val('no');
+
+            if(settings.timer)
+                $('#settings-timer').val('yes');
+            else
+                $('#settings-timer').val('no');
+
+            $('.overlay-select').removeClass('active');
+            $('[data-value="'+settings.overlay+'"]').addClass('active');
+
+            $('[data-value="'+settings.overlay+'"]').trigger('click');
+            $('#settings-overlay-mode').trigger('change');
+        }else if(page == 'dashboard'){
+            $('#dashboard-data').css('display', 'none');
+            $('#dashboard-data').html('');
+            $('#dashboard-not-found').css('display', 'none');
+            
+            dynamicLoading('#dashboard-card');
+            
+            $.ajax({
+                type: "POST",
+                url: '/get-files',
+                success: function(data){
+                    dynamicReady('#dashboard-card');
+                    if(data.status != true){
+                        $('#danger-alert').html(data.message).fadeIn('fast', function(){
+                            $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                        });
+
+                        $('#dashboard-not-found').fadeIn('fast');
+
+                        return;
+                    }
+
+                    items = [];
+
+                    if(data.items.length < 1){
+                        $('#dashboard-not-found').fadeIn('fast');
+
+                        return;
+                    }
+                    
+                    for(var i=0;i<data.items.length;i++)
+                        addItem(data.items[i]);
+
+                    $('#dashboard-data').fadeIn('fast');
+                    $('#dashboard-not-found').fadeOut('fast');
+
+                },
+                error: function(data){
+                    dynamicReady('#dashboard-card');
+                    $('#danger-alert').html('Something went wrong.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                    });
+
+                    $('#dashboard-data').fadeOut('fast');
+                    $('#dashboard-not-found').fadeIn('fast');
+                }
+            });
+        }else if(page == 'modules'){
+            $('#modules-data').css('display', 'none');
+            $('#modules-data').html('');
+            $('#modules-not-found').css('display', 'none');
+            
+            dynamicLoading('#modules-card');
+            
+            $.ajax({
+                type: "POST",
+                url: '/get-modules',
+                success: function(data){
+                    dynamicReady('#modules-card');
+                    if(data.status != true){
+                        $('#danger-alert').html(data.message).fadeIn('fast', function(){
+                            $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                        });
+
+                        $('#modules-not-found').fadeIn('fast');
+
+                        return;
+                    }
+
+                    modules = [];
+
+                    if(data.items.length < 1){
+                        $('#modules-not-found').fadeIn('fast');
+
+                        return;
+                    }
+                    
+                    for(var i=0;i<data.items.length;i++)
+                        addModule(data.items[i]);
+
+                    $('#modules-data').fadeIn('fast');
+                    $('#modules-not-found').fadeOut('fast');
+
+                },
+                error: function(data){
+                    dynamicReady('#modules-card');
+                    $('#danger-alert').html('Something went wrong.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                    });
+
+                    $('#modules-data').fadeOut('fast');
+                    $('#modules-not-found').fadeIn('fast');
+                }
+            });
+        }
+   }
+
+    function logout(){
+        $('#danger-alert').html('').css('display', 'none');
+        $('#success-alert').html('').css('display', 'none');
+        $.ajax({
+            type: "POST",
+            url: '/logout-action',
+            success: function(data){
+                if(data.status != true){
+                    $('#danger-alert').html(data.message).fadeIn('fast');
+                    return;
+                }
+
+                $('#success-alert').html('Logout successful. You are redirected..').fadeIn('fast', function(){
+                    $("html, body").animate({ scrollTop: $('#success-alert').offset().top }, 500);
+                });
+                setTimeout(function(e){
+                    window.location.href = '/';
+                }, 500);
+            },
+            error: function(data){
+                $('#danger-alert').html('Something went wrong.').fadeIn('fast', function(){
+                    $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                });
+            }
+        });
+    }
+
+    document.querySelector(".numericOnly").addEventListener("keypress", function (evt) {
+        if (evt.which != 8 && evt.which != 0 && evt.which < 48 || evt.which > 57) {
+            evt.preventDefault();
+        }
+    });
+    
+    function addModule(item){
+
+        var obj = $('#modules-object-template').html();
+        obj = obj.replace(/{id}/g, item.id);
+        obj = obj.replace(/{title}/g, item.name);
+
+        obj = $(obj);
+
+        if(item.status == 1){
+            obj.find('#modules-object-'+item.id+'-show-passive').css('display', 'none');
+            obj.find('#modules-object-'+item.id+'-make-active').css('display', 'none');
+        }else{
+            obj.find('#modules-object-'+item.id+'-show-active').css('display', 'none');
+            obj.find('#modules-object-'+item.id+'-make-passive').css('display', 'none');
+        }
+
+        item.data = JSON.parse(item.data);
+        item.settings = JSON.parse(item.settings);
+
+        modules.push(item);
+        $('#modules-data').append(obj);
+    }
+
+    function addItem(item){
+
+        var title = item.title;
+        if(item.title == null)
+        title = '[No Title]';
+
+        var obj = $('#dashboard-object-template').html();
+        obj = obj.replace(/{id}/g, item.id);
+        obj = obj.replace(/{title}/g, title);
+
+        var url = '/get-file?key={{-this.requestKey}}&id='+item.id+'&forPan=ok';
+
+        obj = $(obj);
+
+        var objUrl = url;
+        if(item.type != 1){
+            objUrl = '/dist/img/play.png';
+        }
+
+        obj.find('.dashboard-item-image').css('background-image', 'url('+objUrl+')');
+
+
+        if(item.status == 1){
+            obj.find('#dashboard-object-'+item.id+'-show-passive').css('display', 'none');
+            obj.find('#dashboard-object-'+item.id+'-make-active').css('display', 'none');
+        }else{
+            obj.find('#dashboard-object-'+item.id+'-show-active').css('display', 'none');
+            obj.find('#dashboard-object-'+item.id+'-make-passive').css('display', 'none');
+        }
+
+        items.push(item);
+        $('#dashboard-data').append(obj);
+    }
+
+    function getItem(id){
+        for(var i=0;i<items.length;i++){
+            if(items[i].id == id)
+                return items[i];
+        }
+
+        return null;
+    }
+
+    function getModule(id){
+        for(var i=0;i<modules.length;i++){
+            if(modules[i].id == id)
+                return modules[i];
+        }
+
+        return null;
+    }
+    
+    function openImage(id){
+        $('#danger-alert').html('').css('display', 'none');
+        $('#success-alert').html('').css('display', 'none');
+
+        var item = getItem(id);
+        if(item == null){
+            $('#danger-alert').html('Media Not Found.').fadeIn('fast', function(){
+                $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+            });
+            $('#success-alert').html('').css('display', 'none');
+
+            return false;
+        }
+        var url = '/get-file?key={{-this.requestKey}}&id='+item.id+'&forPan=ok';
+
+        if(item.type == 1){
+            $('#show-image-modal-image').attr('src', url);
+            $('#show-image-modal-image').css('display', '');
+            $('#show-image-modal-video').css('display', 'none');
+        }else{
+            $('#show-image-modal-video').attr('src', url);
+            $('#show-image-modal-video').css('display', '');
+            $('#show-image-modal-image').css('display', 'none');
+        }
+
+        $('#show-image-modal').modal('show');
+
+        return false;
+    }
+
+    function editItem(id){
+        $('#danger-alert').html('').css('display', 'none');
+        $('#success-alert').html('').css('display', 'none');
+
+        var item = getItem(id);
+        if(item == null){
+            $('#danger-alert').html('Media Not Found.').fadeIn('fast', function(){
+                $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+            });
+            $('#success-alert').html('').css('display', 'none');
+
+            return false;
+        }
+
+        $('#edit-image-modal-id').val(item.id);
+        $('#edit-image-modal-title').val(item.title);
+        $('#edit-image-modal-color').val(item.color);
+        $('.transition-edit-select[data-value="'+item.transition+'"]').trigger('click');
+        $('#edit-image-modal-transition-duration').val(parseInt(item.transitionDuration/1000));
+        $('#edit-image-modal-delay').val(parseInt(item.delay/1000));
+
+        $('#edit-image-modal-color').val(item.color).colorpicker('setValue', item.color);
+
+        $('#edit-image-modal').modal('show');
+    }
+
+    function editModule(id){
+        $('#danger-alert').html('').css('display', 'none');
+        $('#success-alert').html('').css('display', 'none');
+
+        var module = getModule(id);
+        console.log(module);
+        if(module == null){
+            $('#danger-alert').html('Media Not Found.').fadeIn('fast', function(){
+                $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+            });
+            $('#success-alert').html('').css('display', 'none');
+
+            return false;
+        }
+
+
+        moduleSizes.x = module.x;
+        moduleSizes.y = module.y;
+        moduleSizes.w = module.w;
+        moduleSizes.h = module.h;
+
+        $('#edit-module-settings-position-infos').html('X: '+moduleSizes.x+'px, Y: '+moduleSizes.y+'px, Width: '+moduleSizes.w+'px, Height: '+moduleSizes.h+'px');
+
+        $('#edit-module-settings-div').html('');
+
+        $('#edit-module-modal-id').val(module.id);
+        for (const [key, value] of Object.entries(module.settings.settings)) {
+            var obj = $('#module-setting-'+value.type).html();
+            //console.log(value);
+            obj = obj.replace(/{key}/g, key);
+            obj = obj.replace(/{input_name}/g, value.name);
+            obj = obj.replace(/{required}/g, (value.require ? '(Required)' : ''));
+            obj = obj.replace(/{value}/g, (module.data[key] != undefined ? module.data[key] : value.default));
+
+            if(value.min !== undefined)
+                obj = obj.replace(/{min}/g, value.min);
+
+            if(value.max !== undefined)
+                obj = obj.replace(/{max}/g, value.max);
+
+            obj = $(obj);
+            obj.find('#edit-module-'+key).addClass('edit-module-input');
+
+            if(value.type == 'color'){
+                obj.find('#edit-module-'+key).val((module.data[key] != undefined ? module.data[key] : value.default)).colorpicker('setValue', (module.data[key] != undefined ? module.data[key] : value.default));
+            }else if(value.type == 'scroll'){
+                obj.find('#edit-module-'+key).bootstrapSlider();
+            }else if(value.type == 'boolean'){
+                obj.find('#edit-module-'+key).bootstrapSwitch('state', (module.data[key] != undefined ? module.data[key] : value.default));
+            }
+
+            $('#edit-module-settings-div').append(obj);
+        }
+
+        $('#edit-module-modal').modal('show');
+        
+        setTimeout(function(){
+            $(window).trigger('resize');
+
+        }, 300);
+
+    }
+
+    $('#edit-module-settings-position').draggable({
+        drag: function(event, ui) { 
+            
+            var elementX = $(this).css('left').replace('px', '');
+            var elementY = $(this).css('top').replace('px', '');
+
+            var areaWidth = $('#edit-module-settings-position-area').width();
+            var areaHeight = $('#edit-module-settings-position-area').height();
+
+            var x = screen.w*elementX/areaWidth;
+            var y = screen.h*elementY/areaHeight;
+
+            moduleSizes.x = Math.round(x);
+            moduleSizes.y = Math.round(y);
+
+            $('#edit-module-settings-position-infos').html('X: '+moduleSizes.x+'px, Y: '+moduleSizes.y+'px, Width: '+moduleSizes.w+'px, Height: '+moduleSizes.h+'px');
+        }
+    });
+    $('#edit-module-settings-position').resizable({
+        resize: function(event, ui){
+            var elementW = $(this).css('width').replace('px', '');
+            var elementH = $(this).css('height').replace('px', '');
+
+            var areaWidth = $('#edit-module-settings-position-area').width();
+            var areaHeight = $('#edit-module-settings-position-area').height();
+
+            var w = screen.w*elementW/areaWidth;
+            var h = screen.h*elementH/areaHeight;
+
+            moduleSizes.w = Math.round(w);
+            moduleSizes.h = Math.round(h);
+
+            $('#edit-module-settings-position-infos').html('X: '+moduleSizes.x+'px, Y: '+moduleSizes.y+'px, Width: '+moduleSizes.w+'px, Height: '+moduleSizes.h+'px');
+        }
+    });
+
+    $(window).resize(function(event){
+        if ($(event.target).hasClass('ui-resizable')) {
+            return;
+        }
+        var areaWidth = $('#edit-module-settings-position-area').width();
+
+        var height = areaWidth*screen.h/screen.w;
+
+        $('#edit-module-settings-position-area').css('height', height+'px');
+
+        var x = areaWidth*moduleSizes.x/screen.w;
+        var y = height*moduleSizes.y/screen.h;
+        var w = areaWidth*moduleSizes.w/screen.w;
+        var h = height*moduleSizes.h/screen.h;
+        $('#edit-module-settings-position').css('left', x);
+        $('#edit-module-settings-position').css('top', y);
+        $('#edit-module-settings-position').css('width', w);
+        $('#edit-module-settings-position').css('height', h);
+    });
+
+    function passiveActiveRemoveItem(id, status){
+        if(status == 'remove')
+            if(!confirm('This action cannot be undone. Are you sure?'))
+            return false;
+        
+        $('#danger-alert').html('').css('display', 'none');
+        $('#success-alert').html('').css('display', 'none');
+
+        $.ajax({
+            type: "POST",
+            url: '/change-status',
+            data: {
+                id: id,
+                status: status
+            },
+            success: function(data){
+                if(data.status != true){
+                    $('#danger-alert').html(data.message).fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                    });
+
+                    return;
+                }
+                if(status == 'remove'){
+                    $('#dashboard-data').find('#dashboard-object-'+id).remove();
+
+                    $('#success-alert').html('The Media has been removed.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#success-alert').offset().top }, 500);
+                    });
+                }else if(status == 'passive'){
+                    $('#dashboard-data').find('#dashboard-object-'+id+'-show-passive').css('display', '');
+                    $('#dashboard-data').find('#dashboard-object-'+id+'-show-active').css('display', 'none');
+
+                    $('#dashboard-data').find('#dashboard-object-'+id+'-make-passive').css('display', 'none');
+                    $('#dashboard-data').find('#dashboard-object-'+id+'-make-active').css('display', '');
+
+                    $('#success-alert').html('The Media has been disabled.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#success-alert').offset().top }, 500);
+                    });
+                }else{
+                    $('#dashboard-data').find('#dashboard-object-'+id+'-show-active').css('display', '');
+                    $('#dashboard-data').find('#dashboard-object-'+id+'-show-passive').css('display', 'none');
+
+                    $('#dashboard-data').find('#dashboard-object-'+id+'-make-active').css('display', 'none');
+                    $('#dashboard-data').find('#dashboard-object-'+id+'-make-passive').css('display', '');
+
+                    $('#success-alert').html('The Media has been enabled.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#success-alert').offset().top }, 500);
+                    });
+                }
+
+            },
+            error: function(data){
+                $('#danger-alert').html('Something went wrong.').fadeIn('fast', function(){
+                    $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                });
+            }
+        });
+    }
+
+    function passiveActiveRemoveModule(id, status){
+        if(status == 'remove')
+            if(!confirm('This action cannot be undone. Are you sure?'))
+            return false;
+        
+        $('#danger-alert').html('').css('display', 'none');
+        $('#success-alert').html('').css('display', 'none');
+
+        $.ajax({
+            type: "POST",
+            url: '/change-module-status',
+            data: {
+                id: id,
+                status: status
+            },
+            success: function(data){
+                if(data.status != true){
+                    $('#danger-alert').html(data.message).fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                    });
+
+                    return;
+                }
+                if(status == 'remove'){
+                    $('#modules-data').find('#modules-object-'+id).remove();
+
+                    $('#success-alert').html('The Module has been removed.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#success-alert').offset().top }, 500);
+                    });
+                }else if(status == 'passive'){
+                    $('#modules-data').find('#modules-object-'+id+'-show-passive').css('display', '');
+                    $('#modules-data').find('#modules-object-'+id+'-show-active').css('display', 'none');
+
+                    $('#modules-data').find('#modules-object-'+id+'-make-passive').css('display', 'none');
+                    $('#modules-data').find('#modules-object-'+id+'-make-active').css('display', '');
+
+                    $('#success-alert').html('The Module has been disabled.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#success-alert').offset().top }, 500);
+                    });
+                }else{
+                    $('#modules-data').find('#modules-object-'+id+'-show-active').css('display', '');
+                    $('#modules-data').find('#modules-object-'+id+'-show-passive').css('display', 'none');
+
+                    $('#modules-data').find('#modules-object-'+id+'-make-active').css('display', 'none');
+                    $('#modules-data').find('#modules-object-'+id+'-make-passive').css('display', '');
+
+                    $('#success-alert').html('The Module has been enabled.').fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#success-alert').offset().top }, 500);
+                    });
+                }
+
+            },
+            error: function(data){
+                $('#danger-alert').html('Something went wrong.').fadeIn('fast', function(){
+                    $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                });
+            }
+        });
+    }
+
+    function moveSave(orders){
+        $('#danger-alert').html('').css('display', 'none');
+        $('#success-alert').html('').css('display', 'none');
+
+        dynamicLoading('#dashboard-card');
+        $.ajax({
+            type: "POST",
+            url: '/change-orders',
+            data: {
+                orders: orders
+            },
+            success: function(data){
+                dynamicReady('#dashboard-card');
+                if(data.status != true){
+                    $('#danger-alert').html(data.message).fadeIn('fast', function(){
+                        $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                    });
+
+                    return;
+                }
+                
+            },
+            error: function(data){
+                dynamicReady('#dashboard-card');
+                $('#danger-alert').html('Something went wrong.').fadeIn('fast', function(){
+                    $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
+                });
+            }
+        });
+    }
+
+    function dynamicLoading(area){
+        var element = $(area);
+
+        var loadingElement = $('<div></div>');
+        loadingElement.addClass('loading-content');
+        loadingElement.css('position', 'absolute');
+        loadingElement.css('top', '0');
+        loadingElement.css('left', '0');
+        loadingElement.css('width', '100%');
+        loadingElement.css('height', '100%');
+        loadingElement.css('text-align', 'center');
+        loadingElement.css('padding-top', 'calc(height/2 - 100)');
+        loadingElement.css('background-color', 'rgb(255, 255, 255, .6)');
+        loadingElement.css('z-index', '99999');
+
+        var loadLogo = $('<img/>');
+        loadLogo.attr('src', '/dist/img/loading.gif');
+        loadLogo.css('height', '100px');
+
+        loadingElement.append(loadLogo);
+
+        element.append(loadingElement);
+    }
+    function dynamicReady(area){
+        $(area).find('.loading-content').remove();
+    }
+
+</script>
+</body>
+</html>

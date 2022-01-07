@@ -1,0 +1,118 @@
+
+    <!-- Main content -->
+    <div class="content" style="display: none;" id="layer-modules">
+      <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="card">
+              <div class="card-header">
+                  <button type="button" class="btn btn-success" id="add-module-button">Add Module</button>
+              </div>
+            <div class="card-body" id="modules-card">
+              <div class="modules-not-found" id="modules-not-found">
+                  <p class="card-text">There is no module..</p>
+              </div>
+              <div class="row" id="modules-data">
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <!-- /.row -->
+    </div><!-- /.container-fluid -->
+  </div>
+  <!-- /.content -->
+  <div style="display: none;" id="modules-object-template">
+    <div class="col-6 col-sm-4 col-md-3 col-lg-2 modules-item-parent" id="modules-object-{id}" data-id="{id}">
+        <div class="modules-item">
+            <div class="modules-item-title">{title}</div>
+            <div class="modules-item-label">
+                <span class="badge bg-success" id="modules-object-{id}-show-active">Active</span>
+                <span class="badge bg-danger" id="modules-object-{id}-show-passive">Passive</span>
+            </div>
+            <div class="modules-item-actions">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Action 
+                    <div class="dropdown-menu" role="menu">
+                        <a class="dropdown-item" href="#" onclick="return editModule({id});"> Edit</a>
+                        <a class="dropdown-item" id="modules-object-{id}-make-passive" href="#" onclick="return passiveActiveRemoveModule({id}, 'passive');"> Make Passive</a>
+                        <a class="dropdown-item" id="modules-object-{id}-make-active" href="#" onclick="return passiveActiveRemoveModule({id}, 'active');"> Make Active</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#" style="color: #FF0000;" onclick="return passiveActiveRemoveModule({id}, 'remove');"> Remove</a>
+                    </div>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+  </div>
+
+  <div style="display: none;">
+    <div id="module-setting-text">
+      <div class="form-group">
+        <label for="edit-module-{key}">{input_name} {required}:</label>
+        <input type="text" class="form-control" data-key="{key}" id="edit-module-{key}" placeholder="{input_name}" value="{value}">
+      </div>
+    </div>
+    <div id="module-setting-color">
+      <div class="form-group">
+        <label for="edit-module-{key}">{input_name} {required}:</label>
+        <input type="text" class="form-control" data-key="{key}" id="edit-module-{key}" placeholder="{input_name}" value="{value}">
+      </div>
+    </div>
+    <div id="module-setting-scroll">
+      <div class="form-group">
+        <label for="edit-module-{key}">{input_name} {required}:</label><br>
+        <input type="text" data-key="{key}" id="edit-module-{key}" value="{value}" class="slider form-control" data-slider-min="{min}" data-slider-max="{max}"
+                           data-slider-step="1" data-slider-value="{value}" data-slider-orientation="horizontal"
+                           data-slider-selection="before" data-slider-tooltip="show">
+      </div>
+      
+    </div>
+    <div id="module-setting-boolean">
+      <div class="form-group">
+        <label for="edit-module-{key}">{input_name} {required}:</label><br>
+        <input type="checkbox" data-key="{key}" id="edit-module-{key}" data-bootstrap-switch>
+      </div>
+    </div>
+  </div>
+  <div id="upload-module-template" style="display: none;">
+    <input type="file" id="upload-module-file">
+  </div>
+  
+<div class="modal fade" id="edit-module-modal">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Edit Module</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+          <div class="alert alert-danger" id="danger-alert-module-edit-modal" role="alert" style="display: none;"></div>
+          <input type="hidden" id="edit-module-modal-id">
+          <div class="form-group">
+            <label>Module Position (required):</label><br>
+            <div class="edit-module-settings-position-area" id="edit-module-settings-position-area">
+              <div class="edit-module-settings-position" id="edit-module-settings-position">
+
+              </div>
+            </div>
+            <p id="edit-module-settings-position-infos"></p>
+          </div>
+          <hr>
+          <div id="edit-module-settings-div"></div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-primary" id="edit-module-modal-save">Save</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->

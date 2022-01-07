@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Photo Viewer | Login</title>
+
+  <!-- Google Font: Source Sans Pro -->
+  <link rel="stylesheet" href="/gfont/css.css">
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="/plugins/fontawesome-free/css/all.min.css">
+  <!-- Theme style -->
+  <link rel="stylesheet" href="/dist/css/adminlte.min.css">
+</head>
+<body class="hold-transition lockscreen">
+<!-- Automatic element centering -->
+<div class="lockscreen-wrapper">
+  <div class="lockscreen-logo">
+    <a href="#" onclick="return false;"><b>Photo Viewer</b></a>
+  </div>
+  <!-- User name -->
+
+  <!-- START LOCK SCREEN ITEM -->
+  <div class="lockscreen-item" style="margin-top: 50px;">
+    <!-- lockscreen image -->
+    <div class="lockscreen-image">
+      <img src="/dist/img/null-avatar.png" alt="User Image">
+    </div>
+    <!-- /.lockscreen-image -->
+
+    <!-- lockscreen credentials (contains the form) -->
+    <form class="lockscreen-credentials" onsubmit="return false;">
+      <div class="input-group">
+        <input type="password" id="password" class="form-control" placeholder="password">
+
+        <div class="input-group-append">
+          <button type="button" class="btn" id="login-button">
+            <i class="fas fa-arrow-right text-muted"></i>
+          </button>
+        </div>
+      </div>
+    </form>
+    <!-- /.lockscreen credentials -->
+
+  </div>
+  <!-- /.lockscreen-item -->
+  <div class="help-block text-center">
+    Enter password to login control panel.
+    <div style="margin: 30px;">
+        <div class="alert alert-danger" id="danger-alert" role="alert" style="display: none;"></div>
+        <div class="alert alert-success" id="success-alert" role="alert" style="display: none;"></div>
+    </div>
+  </div>
+
+  <div class="lockscreen-footer text-center">
+    Copyright &copy; 2021 <b><a href="https://serhatsaral.com" class="text-black">T. Serhat Saral</a></b><br>
+    All rights reserved
+  </div>
+</div>
+<!-- /.center -->
+
+<!-- jQuery -->
+<script src="/plugins/jquery/jquery.min.js"></script>
+<!-- Bootstrap 4 -->
+<script src="/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+<script>
+    $(document).ready(function(){
+        $('#password').keyup(function(e){
+            if(e.keyCode == 13)
+                login();
+        });
+        $('#login-button').on('click', function(e){
+            login();
+        });
+    });
+
+    function login(){
+        $('#danger-alert').html('').css('display', 'none');
+        $('#success-alert').html('').css('display', 'none');
+
+        var password = $('#password').val();
+        if(password == ''){
+            $('#danger-alert').html('The Password must be entered.').fadeIn('fast');
+            return;
+        }
+        
+        var buttonOldHtml = $('#login-button').html();
+        $('#login-button').prop('disabled', true);
+        $('#password').prop('disabled', true);
+        $('#login-button').html('<i class="fas fa-spinner"></i>');
+
+        $.ajax({
+            type: "POST",
+            url: '/login-action',
+            data: {
+                password: password,
+            },
+            success: function(data){
+                if(data.status != true){
+                    $('#danger-alert').html(data.message).fadeIn('fast');
+
+                    $('#login-button').prop('disabled', false);
+                    $('#password').prop('disabled', false);
+                    $('#login-button').html(buttonOldHtml);
+                    
+                    return;
+                }
+
+                $('#danger-alert').html('').css('display', 'none');
+                $('#success-alert').html('Login successful. You are redirected..').fadeIn('fast');
+                setTimeout(function(e){
+                    window.location.href = '/dashboard';
+                }, 1000);
+            },
+            error: function(data){
+                $('#danger-alert').html('Something went wrong.').fadeIn('fast');
+                
+                $('#login-button').prop('disabled', false);
+                $('#password').prop('disabled', false);
+                $('#login-button').html(buttonOldHtml);
+            }
+        });
+    }
+</script>
+</body>
+</html>
