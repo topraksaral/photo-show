@@ -15,6 +15,7 @@ By examining the sample clock module, you can develop your own modules and add t
 - Move the assembly into the c:\ps\ folder (Make sure the executable name is photoShow.exe)
 - In Regedit, set the EnableLUA variable in HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Policies\System to "0". (This operation is required for switching to tablet mode, switching to PhotoShow mode.)
 - In Regedit, set the shell variable in the HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\WinLogon folder to "C:\ps\photoShow.exe" (For the application to run in kiosk mode on the tablet)
+- You need ffmpeg
 
 - if you want you can download the release and you can run install.bat.
 
