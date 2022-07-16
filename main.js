@@ -9,6 +9,8 @@ const { networkInterfaces } = require('os');
 const extract = require('extract-zip');
 const shutdown = require('electron-shutdown-command');
 const chpr = require('child_process');
+const sharp = require('sharp');
+var ffmpeg = require('fluent-ffmpeg');
 
 var WiFiControl = require('wifi-control');
 WiFiControl.init({
@@ -73,7 +75,7 @@ const port = '8000';
 var width = 0;
 var height = 0;
 var wifiCheck = setInterval(wifiCheckFunc, 5000);
-
+var videoTasks = [];
 
 var dApp = server();
 dApp.listen('http://0.0.0.0:'+port);
@@ -454,13 +456,23 @@ dApp.post('/upload-file', checkLoginMiddleware, checkUploadMiddleware, async fun
         return false;
     }
     
-    if($.file.mimetype != 'image/png' && $.file.mimetype != 'image/jpeg' && $.file.mimetype != 'video/mp4'){
+    if($.file.mimetype != 'image/png' && $.file.mimetype != 'image/jpeg' && $.file.mimetype != 'video/mp4' && $.file.mimetype != 'video/quicktime'){
         $.data.message = 'Invalid file type. Only allowed:png, jpg, jpeg, mp4';
-
         $.json();
 	    $.end();
 
         return false;
+    }
+
+    if($.file.mimetype == 'image/png' || $.file.mimetype == 'image/jpeg'){
+        if(!$.body.top || !$.body.left || !$.body.width || !$.body.height){
+            $.data.message = 'The image is not cropped.';
+    
+            $.json();
+            $.end();
+    
+            return false;
+        }
     }
 
     const tempFolder = require("path").dirname(app.getPath("exe"))+'/tempUploadArea';
@@ -470,29 +482,46 @@ dApp.post('/upload-file', checkLoginMiddleware, checkUploadMiddleware, async fun
 
         var delay = await getSetting('delay');
         var type = 1;
-        if($.file.mimetype == 'video/mp4'){
-            const fsp = fs.promises;
-
-            const  buff = new Buffer(100);
-            const fileHandle = await fsp.open(newFilePath, 'r');
-            const { buffer } = await fileHandle.read(buff, 0, 100, 0);
-            await fileHandle.close();
-
-            const start = buffer.indexOf(Buffer.from('mvhd')) + 17;
-            const timeScale = buffer.readUInt32BE(start, 4);
-            const duration = buffer.readUInt32BE(start + 4, 4);
-            const audioLength = Math.floor(duration/timeScale * 1000) / 1000;
-            delay = Math.floor(audioLength) * 1000;
-
+        //var title = path.parse($.file.originalFilename).name;
+        var title = null;
+        var status = 1;
+        var quicktime = null;
+        if($.file.mimetype == 'video/mp4' || $.file.mimetype == 'video/quicktime'){
+            status = 0;
+            var newFilePathCrop = newFilePath+'-crop';
+            $.file.newFilename = $.file.newFilename+'-crop';
             type = 2;
+            
+            quicktime = {
+                file: newFilePath,
+                nFile: newFilePathCrop,
+            };
+        }else{
+            var newFilePathCrop = newFilePath+'-crop';
+            await sharp(newFilePath).rotate().extract({ width: parseInt($.body.width), height: parseInt($.body.height), left: parseInt($.body.left), top: parseInt($.body.top) }).resize(width, height).jpeg({ mozjpeg: true }).toFile(newFilePathCrop);
+            fs.unlinkSync(newFilePath);
+            $.file.newFilename = $.file.newFilename+'-crop';
+
+            if($.body.title !== undefined){
+                title = $.body.title;
+            }
         }
+
+        if(title == '')
+            title = null;
         
         var photo = await Photo.create({
             path: '/'+$.file.newFilename,
-            title: path.parse($.file.originalFilename).name,
+            title: title,
             type: type,
-            delay: delay
+            delay: delay,
+            status: status,
         });
+
+        if($.file.mimetype == 'video/mp4' || $.file.mimetype == 'video/quicktime'){
+            quicktime.id = photo.id;
+            videoTasks.push(quicktime);
+        }
 
         $.data.status = true;
         $.data.item = photo;
@@ -500,16 +529,16 @@ dApp.post('/upload-file', checkLoginMiddleware, checkUploadMiddleware, async fun
         $.json();
         $.end();
 
-        var photos = await Photo.findAll({
-            where: {
-                status: 1
-            },
-            order: [
-                ['_order']
-            ],
-        });
-
         if(mainWin != null){
+            var photos = await Photo.findAll({
+                where: {
+                    status: 1
+                },
+                order: [
+                    ['_order']
+                ],
+            });
+
             mainWin.webContents.send('updated-files', {
                 slides: photosFriendly(photos)
             });
@@ -605,6 +634,23 @@ dApp.post('/update-file', checkLoginMiddleware, async function ($){
         return false;
     }
 
+    var found = false;
+    for(var i=0;i<videoTasks.length;i++){
+        if(videoTasks[i].id == $.body.id){
+            found = true;
+            break;
+        }
+    }
+
+    if(found){
+        $.data.message = 'The video is being processed. No action can be taken at this stage.';
+
+        $.json();
+	    $.end();
+
+        return false;
+    }
+    
     var id = $.body.id;
     var title = $.body.title;
     var color = $.body.color;
@@ -723,48 +769,61 @@ dApp.post('/change-status', checkLoginMiddleware, async function ($){
     else if(!['active', 'passive', 'remove'].includes(status))
         $.data.message = 'Invalid update type.';
     else{
-        if(status == 'remove'){
-            await Photo.destroy({
-                where: {
-                    id: id
-                }
-            });
 
-            if(photo.area == 0){
-                const tempFolder = require("path").dirname(app.getPath("exe"))+'/tempUploadArea';
-                if(fs.existsSync(tempFolder+photo.path)){
-                    fs.unlinkSync(tempFolder+photo.path);
-                }
+        var found = false;
+        for(var i=0;i<videoTasks.length;i++){
+            if(videoTasks[i].id == photo.id){
+                found = true;
+                break;
             }
-        }else{
-            status = (status == 'active' ? 1 : 0);
+        }
 
-            await Photo.update({
-                status: status
-            }, {
-                where: {
-                    id: id
+        if(found){
+            $.data.message = 'The video is being processed. No action can be taken at this stage.';
+        }else{
+            if(status == 'remove'){
+                await Photo.destroy({
+                    where: {
+                        id: id
+                    }
+                });
+    
+                if(photo.area == 0){
+                    const tempFolder = require("path").dirname(app.getPath("exe"))+'/tempUploadArea';
+                    if(fs.existsSync(tempFolder+photo.path)){
+                        fs.unlinkSync(tempFolder+photo.path);
+                    }
                 }
+            }else{
+                status = (status == 'active' ? 1 : 0);
+    
+                await Photo.update({
+                    status: status
+                }, {
+                    where: {
+                        id: id
+                    }
+                });
+        
+            }
+            
+            var photos = await Photo.findAll({
+                where: {
+                    status: 1
+                },
+                order: [
+                    ['_order']
+                ],
             });
     
+            if(mainWin != null){
+                mainWin.webContents.send('updated-files', {
+                    slides: photosFriendly(photos)
+                });
+            }
+    
+            $.data.status = true;
         }
-        
-        var photos = await Photo.findAll({
-            where: {
-                status: 1
-            },
-            order: [
-                ['_order']
-            ],
-        });
-
-        if(mainWin != null){
-            mainWin.webContents.send('updated-files', {
-                slides: photosFriendly(photos)
-            });
-        }
-
-        $.data.status = true;
     }
 
     $.json();
@@ -1013,8 +1072,8 @@ app.whenReady().then( async function(){
     width = primaryDisplay.workAreaSize.width;
     height = primaryDisplay.workAreaSize.height;
     
-    //width = 1280;
-    //height = 800;
+    width = 800;
+    height = 1280;
     var photos = await Photo.findAll({
         where: {
             status: 1
@@ -1334,6 +1393,7 @@ async function checkLoginMiddleware($){
 async function checkUploadMiddleware($){
     var form = new formidable.IncomingForm();
     form.parse($.request, function(err, fields, files) {
+        $.body = fields;
         $.file = files.file;
         
         $.return();
@@ -1347,3 +1407,80 @@ function isHexColor (hex) {
         && hex.length === 6
         && !isNaN(Number('0x' + hex))
 }
+
+async function videoTaskProc(){
+    if(videoTasks.length > 0){
+        var vid = videoTasks[0];
+
+        var delay = 15000;
+        ffmpeg(vid.file)
+            .format('mp4')
+            .size(width+'x?')
+            .aspect((width/height))
+            .autopad('#000000')
+            .output(vid.nFile)
+            .on('codecData', function(data) {
+                var dur = data.duration.split(':');
+                delay = (Math.floor(dur[2])+(parseInt(dur[1])*60)+(parseInt(dur[0]*60*60))) * 1000;
+            })
+            .on('end', async function() {            
+                fs.unlinkSync(vid.file);
+
+                /*
+                const fsp = fs.promises;
+
+                const  buff = new Buffer(100);
+                const fileHandle = await fsp.open(vid.nFile, 'r');
+                const { buffer } = await fileHandle.read(buff, 0, 100, 0);
+                await fileHandle.close();
+    
+                const start = buffer.indexOf(Buffer.from('mvhd')) + 17;
+                const timeScale = buffer.readUInt32BE(start, 4);
+                const duration = buffer.readUInt32BE(start + 4, 4);
+                const audioLength = Math.floor(duration/timeScale * 1000) / 1000;
+                */
+
+                console.log(delay);
+
+                await Photo.update({
+                    status: 1,
+                    delay: delay
+                }, {
+                    where: {
+                        id: vid.id
+                    }
+                });
+                videoTasks.shift();
+        
+                if(mainWin != null){
+                    var photos = await Photo.findAll({
+                        where: {
+                            status: 1
+                        },
+                        order: [
+                            ['_order']
+                        ],
+                    });
+
+                    mainWin.webContents.send('updated-files', {
+                        slides: photosFriendly(photos)
+                    });
+                }
+
+                setTimeout(function(){
+                    videoTaskProc();
+                }, 1000);
+            }).on('error', async function(err, stdout, stderr) {
+                setTimeout(function(){
+                    videoTaskProc();
+                }, 1000);
+            })
+            .run();
+    }else{
+        setTimeout(function(){
+            videoTaskProc();
+        }, 1000);
+    }
+}
+
+videoTaskProc();

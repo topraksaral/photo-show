@@ -56,28 +56,62 @@
   <input type="file" id="upload-file">
 </div>
 
-  <div class="modal fade" id="show-image-modal">
-    <div class="modal-dialog modal-xl">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h4 class="modal-title">View Media</h4>
-          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-          </button>
-        </div>
-        <div class="modal-body">
-            <img src="" id="show-image-modal-image" style="width: 100%; display: none;">
-            <video controls src="" id="show-image-modal-video" style="width: 100%; display: none; height: 300px;">
-        </div>
-        <div class="modal-footer justify-content-between">
-          <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        </div>
+<div class="modal fade" id="show-image-modal">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">View Media</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
       </div>
-      <!-- /.modal-content -->
+      <div class="modal-body">
+          <img src="" id="show-image-modal-image" style="width: 100%; display: none;">
+          <video controls src="" id="show-image-modal-video" style="width: 100%; display: none; height: 300px;">
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
     </div>
-    <!-- /.modal-dialog -->
+    <!-- /.modal-content -->
   </div>
-  <!-- /.modal -->
+  <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+
+<div class="modal fade" id="crop-image-modal">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h4 class="modal-title">Crop Media</h4>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="alert alert-danger" id="danger-crop-alert" role="alert" style="display: none;"></div>
+        <div id="crop-image-modal-area" style="width:100%; position:relative;">
+          <img src="" id="crop-image-modal-image" style="width: 100%;">
+          <div id="crop-image-modal-selector" class="crop-image-modal-selector">
+
+          </div>
+        </div>
+        <hr>
+        <div class="form-group">
+          <label for="crop-image-modal-title">Title:</label>
+          <input type="text" class="form-control" id="crop-image-modal-title" placeholder="Title">
+      </div>
+      </div>
+      <div class="modal-footer justify-content-between">
+        <button type="button" class="btn btn-primary" id="crop-image-modal-save">Save</button>
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
 
   <div class="modal fade" id="edit-image-modal">
     <div class="modal-dialog modal-xl">

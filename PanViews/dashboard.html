@@ -123,6 +123,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
         border: 1px solid #555555;
         cursor: move;
     }
+    .crop-image-modal-selector {
+        position: absolute;
+        border: 1px solid #555555;
+        background-color: #999999;
+        opacity: .5;
+        cursor: move;
+    }
   </style>
 </head>
 <body class="hold-transition layout-top-nav">
@@ -257,6 +264,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
     var items = [];
     var modules = [];
 
+    var availableFile = {};
+
     $(document).ready(function(){
         openPage('dashboard');
 
@@ -332,6 +341,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
             return false;
         });
         
+        $('#crop-image-modal').on('shown.bs.modal', function(){
+            configureCrop();
+        });
+
         $('#upload-file').on('change', function(){
             $('#danger-alert').html('').css('display', 'none');
             $('#success-alert').html('').css('display', 'none');
@@ -341,11 +354,42 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 return;
             
             var file = element.files[0];
-            if(file.type != 'image/png' && file.type != 'image/jpeg' && file.type != 'video/mp4'){
+            if(file.type != 'image/png' && file.type != 'image/jpeg' && file.type != 'video/mp4' && file.type != 'video/quicktime'){
                 $('#danger-alert').html('Invalid file type. Only allowed:png, jpg, jpeg, mp4').fadeIn('fast', function(){
                     $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
                 });
                 $(this).val('');
+
+                return false;
+            }
+
+            if(file.type == 'image/png' || file.type == 'image/jpeg'){
+                var url = URL.createObjectURL(file);
+
+                var image = new Image();
+                image.onload = function() {
+
+                    $('#upload-file').val('');                    
+
+                    availableFile.file = file;
+
+                    $('#crop-image-modal-title').val(file.name);
+                    $('#crop-image-modal-image').attr('src', url);
+
+                    $('#danger-crop-alert').html('').css('display', 'none');
+                    
+                    $('#crop-image-modal').modal('show');
+                    
+                    var naturalWidth = $(image).prop('naturalWidth');
+                    var naturalHeight = $(image).prop('naturalHeight');
+                    
+                    
+                    if(naturalWidth < screen.w || naturalHeight < screen.h){
+                        $('#danger-crop-alert').html('The image resolution is low. The Image May Be Bad.').fadeIn('fast');
+                    }
+
+                }
+                image.src = url;
 
                 return false;
             }
@@ -1192,6 +1236,106 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
     }
 
+
+    $('#crop-image-modal-selector').draggable({
+        containment: "#crop-image-modal-area",
+        drag: function(event, ui) { 
+            
+            var elementX = $(this).css('left').replace('px', '');
+            var elementY = $(this).css('top').replace('px', '');
+
+            var areaWidth = $('#crop-image-modal-area').width();
+            var areaHeight = $('#crop-image-modal-area').height();
+
+            var x = elementX;
+            var y = elementY;
+
+            availableFile.x = x;
+            availableFile.y = y;
+        }
+    });
+    $('#crop-image-modal-selector').resizable({
+        containment: "#crop-image-modal-area",
+        aspectRatio: true,
+        resize: function(event, ui){
+            var elementW = $(this).css('width').replace('px', '');
+            var elementH = $(this).css('height').replace('px', '');
+
+            var areaWidth = $('#crop-image-modal-area').width();
+            var areaHeight = $('#crop-image-modal-area').height();
+
+            var w = elementW;
+            var h = elementH;
+
+            availableFile.w = w;
+            availableFile.h = h;
+        }
+    });
+
+    $('#crop-image-modal-save').on('click', function(){
+        $('#danger-alert').html('').css('display', 'none');
+        $('#success-alert').html('').css('display', 'none');
+
+        $('#crop-image-modal').modal('hide');
+
+        dynamicLoading('#layer-dashboard');
+
+        var colw = availableFile.naturalWidth/availableFile.width;
+        var colh = availableFile.naturalHeight/availableFile.height;
+
+
+        var top = Math.round(availableFile.y*colh);
+        var left = Math.round(availableFile.x*colw);
+        var width = Math.round(availableFile.w*colw);
+        var height = Math.round(availableFile.h*colh);
+
+console.log(availableFile);
+
+        var formData = new FormData();
+        formData.append('file', availableFile.file);
+        formData.append('top', top);
+        formData.append('left', left);
+        formData.append('width', width);
+        formData.append('height', height);
+        formData.append('title', $('#crop-image-modal-title').val());
+        
+        $.ajax({
+            url : '/upload-file',
+            type : 'POST',
+            data : formData,
+            processData: false,  // tell jQuery not to process the data
+            contentType: false,  // tell jQuery not to set contentType
+            success : function(data) {
+                dynamicReady('#layer-dashboard');
+                if(!data.status){
+                    $('#danger-alert-edit-modal').html(data.message).fadeIn('fast', function(){
+                        $("#edit-image-modal").animate({ scrollTop: $('#danger-alert-edit-modal').offset().top }, 500);
+                    });
+
+                    return;
+                }
+
+                $('#success-alert').html('Media Uploaded.').fadeIn('fast', function(){
+                    $("html, body").animate({ scrollTop: $('#success-alert').offset().top }, 500);
+                });
+                
+                $('#dashboard-data').fadeIn('fast');
+                $('#dashboard-not-found').fadeOut('fast');
+
+                addItem(data.item);
+
+            },
+            error: function(data){
+                dynamicReady('#layer-dashboard');
+                $('#danger-alert-edit-modal').html('Something went wrong.').fadeIn('fast', function(){
+                    $("#edit-image-modal").animate({ scrollTop: $('#danger-alert-edit-modal').offset().top }, 500);
+                });
+            }
+        });
+    });
+
+
+
     $('#edit-module-settings-position').draggable({
         drag: function(event, ui) { 
             
@@ -1246,6 +1390,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
         $('#edit-module-settings-position').css('top', y);
         $('#edit-module-settings-position').css('width', w);
         $('#edit-module-settings-position').css('height', h);
+
+        configureCrop();
     });
 
     function passiveActiveRemoveItem(id, status){
@@ -1255,6 +1401,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
         
         $('#danger-alert').html('').css('display', 'none');
         $('#success-alert').html('').css('display', 'none');
+        
+        dynamicLoading('#layer-dashboard');
 
         $.ajax({
             type: "POST",
@@ -1264,6 +1412,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 status: status
             },
             success: function(data){
+                dynamicReady('#layer-dashboard');
+
                 if(data.status != true){
                     $('#danger-alert').html(data.message).fadeIn('fast', function(){
                         $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
@@ -1301,6 +1451,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
             },
             error: function(data){
+                dynamicReady('#layer-dashboard');
                 $('#danger-alert').html('Something went wrong.').fadeIn('fast', function(){
                     $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
                 });
@@ -1315,6 +1466,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
         
         $('#danger-alert').html('').css('display', 'none');
         $('#success-alert').html('').css('display', 'none');
+        dynamicLoading('#layer-modules');
 
         $.ajax({
             type: "POST",
@@ -1324,6 +1476,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 status: status
             },
             success: function(data){
+                dynamicReady('#layer-modules');
                 if(data.status != true){
                     $('#danger-alert').html(data.message).fadeIn('fast', function(){
                         $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
@@ -1361,6 +1514,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
             },
             error: function(data){
+                dynamicReady('#layer-modules');
                 $('#danger-alert').html('Something went wrong.').fadeIn('fast', function(){
                     $("html, body").animate({ scrollTop: $('#danger-alert').offset().top }, 500);
                 });
@@ -1424,6 +1578,66 @@ scratch. This page gets rid of all links and provides the needed markup only.
     }
     function dynamicReady(area){
         $(area).find('.loading-content').remove();
+    }
+
+    function configureCrop(){
+        if(!$('#crop-image-modal').hasClass('show')){
+            return false;
+        }
+
+        var element = $('#crop-image-modal-image');
+        var width = element.prop('width');
+        var height = element.prop('height');
+        
+        var naturalWidth = element.prop('naturalWidth');
+        var naturalHeight = element.prop('naturalHeight');
+
+        var col = screen.h/screen.w;
+
+        var wi = width*80/100;
+        var he = wi*col;
+
+        var minWi = screen.w*width/naturalWidth;
+        var minHe = minWi*col;
+
+        var top = (height-he)/2;
+        var left = (width-wi)/2;
+
+        if(naturalWidth <= screen.w || naturalHeight <= screen.h){
+
+            var col2 = naturalHeight/naturalWidth;
+            
+            if(col2 > col){
+                wi = width;
+                he = wi*col;
+            }else{
+                he = height;
+                wi = he/col;
+            }
+
+            minWi = wi;
+            minHe = he;
+
+            top = 0;
+            left = 0;
+        }
+
+        availableFile.w = wi;
+        availableFile.h = he;
+        availableFile.x = left;
+        availableFile.y = top;
+        availableFile.width = width;
+        availableFile.height = height;
+        availableFile.naturalWidth = naturalWidth;
+        availableFile.naturalHeight = naturalHeight;
+
+        $('#crop-image-modal-selector').css('top', top+'px');
+        $('#crop-image-modal-selector').css('left', left+'px');
+        $('#crop-image-modal-selector').css('width', wi+'px');
+        $('#crop-image-modal-selector').css('height', he+'px');
+
+        $('#crop-image-modal-selector').resizable('option', 'minWidth', minWi);
+        $('#crop-image-modal-selector').resizable('option', 'minHeight', minHe);
     }
 
 </script>
